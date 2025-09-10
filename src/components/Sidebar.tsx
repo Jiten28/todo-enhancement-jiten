@@ -297,7 +297,7 @@ export const ProfileSidebar = () => {
 
         <StyledDivider />
 
-        <MenuLink to="https://github.com/maciekt07/TodoApp">
+        <MenuLink to="https://github.com/Jiten28/todo-enhancement-jiten">
           <StyledMenuItem translate="no">
             <GitHub className="GitHubIcon" /> &nbsp; Github{" "}
             {stars && (
@@ -313,7 +313,7 @@ export const ProfileSidebar = () => {
           </StyledMenuItem>
         </MenuLink>
 
-        <MenuLink to="https://github.com/maciekt07/TodoApp/issues/new">
+        <MenuLink to="https://github.com/Jiten28/todo-enhancement-jiten/issues/new">
           <StyledMenuItem>
             <BugReportRounded className="BugReportRoundedIcon" /> &nbsp; Report Issue{" "}
             {Boolean(issuesCount || issuesCount === 0) && (
@@ -330,7 +330,7 @@ export const ProfileSidebar = () => {
           </StyledMenuItem>
         </MenuLink>
 
-        <MenuLink to="https://www.buymeacoffee.com/maciekt07">
+        <MenuLink to="https://buymeacoffee.com/jiten282005">
           <StyledMenuItem className="bmcMenu">
             <BmcIcon className="bmc-icon" src={theme.darkmode ? bmcLogoLight : bmcLogo} /> &nbsp;
             Buy me a coffee{" "}
