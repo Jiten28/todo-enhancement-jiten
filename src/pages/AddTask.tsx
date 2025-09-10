@@ -1,4 +1,4 @@
-import { Category, Task } from "../types/user";
+import { Category, Task, Priority } from "../types/user";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
