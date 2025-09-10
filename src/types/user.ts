@@ -64,9 +64,9 @@ export interface Task {
   position?: number;
 
   /**
-   * Priority of the task (optional for backward compatibility)
+   * Priority of the task
    */
-  priority?: Priority;
+  priority: Priority; // <- made strongly required instead of optional
 }
 
 /**

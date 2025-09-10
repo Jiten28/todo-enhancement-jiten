@@ -49,10 +49,7 @@ interface TaskItemProps {
   blur?: boolean;
   textHighlighter?: (text: string) => React.ReactNode;
 }
-/**
- * A reusable task component that displays task information with configurable features.
- * used across different views (TasksList, Share, ShareDialog) with consistent styling but varied behavior.
- */
+
 export const TaskItem = memo(
   ({
     task,
@@ -67,7 +64,6 @@ export const TaskItem = memo(
     const { settings } = user;
     const { moveMode } = useContext(TaskContext);
 
-    // dnd-kit sortable logic
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
       id: task.id,
       disabled: !moveMode,
@@ -83,7 +79,6 @@ export const TaskItem = memo(
     } = features;
 
     const { selectedIds = [], onSelect, onDeselect } = selection || {};
-
     const isSelected = selectedIds.includes(task.id);
 
     const handleSelectChange = (taskId: UUID) => {
@@ -94,9 +89,7 @@ export const TaskItem = memo(
       }
     };
 
-    if (!task) {
-      return null;
-    }
+    if (!task) return null;
 
     return (
       <TaskContainer
@@ -125,6 +118,7 @@ export const TaskItem = memo(
             <DragIndicatorRounded sx={{ mr: "4px", ml: "-8px" }} />
           </DragHandle>
         )}
+
         {enableSelection && selectedIds.length > 0 && (
           <StyledRadio
             clr={getFontColor(task.color)}
@@ -165,9 +159,11 @@ export const TaskItem = memo(
               <PushPinRounded fontSize="small" /> &nbsp; Pinned
             </Pinned>
           )}
+
           <TaskHeader>
             <TaskName done={task.done}>{textHighlighter(task.name)}</TaskName>
 
+            {/* ✅ Priority badge inline with task name */}
             {task.priority && (
               <PriorityBadge level={task.priority}>
                 {`${task.priority.charAt(0).toUpperCase()}${task.priority.slice(1)}`}
@@ -213,10 +209,8 @@ export const TaskItem = memo(
                 <RingAlarm
                   fontSize="small"
                   animate={new Date() > new Date(task.deadline) && !task.done}
-                  sx={{
-                    color: `${getFontColor(task.color)} !important`,
-                  }}
-                />{" "}
+                  sx={{ color: `${getFontColor(task.color)} !important` }}
+                />
                 &nbsp;
                 {new Date(task.deadline).toLocaleDateString()} {" • "}
                 {new Date(task.deadline).toLocaleTimeString()}
@@ -252,6 +246,7 @@ export const TaskItem = memo(
             </TaskCategoriesContainer>
           )}
         </TaskInfo>
+
         <TaskActionsContainer>{actions}</TaskActionsContainer>
       </TaskContainer>
     );

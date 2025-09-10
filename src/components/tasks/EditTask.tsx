@@ -34,7 +34,6 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const [editedTask, setEditedTask] = useState<Task | undefined>(task);
   const [emoji, setEmoji] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-
   const theme = useTheme();
 
   const nameError = useMemo(
@@ -47,7 +46,6 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     [editedTask?.description],
   );
 
-  // Effect hook to update the editedTask with the selected emoji.
   useEffect(() => {
     setEditedTask((prevTask) => ({
       ...(prevTask as Task),
@@ -55,23 +53,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     }));
   }, [emoji]);
 
-  // Effect hook to update the editedTask when the task prop changes.
   useEffect(() => {
     setEditedTask(task);
     setSelectedCategories(task?.category as Category[]);
   }, [task]);
 
-  // Event handler for input changes in the form fields.
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-
-    // Update the editedTask state with the changed value.
     setEditedTask((prevTask) => ({
       ...(prevTask as Task),
       [name]: value,
     }));
   };
-  // Event handler for saving the edited task.
+
   const handleSave = () => {
     document.body.style.overflow = "auto";
     if (editedTask && !nameError && !descriptionError) {
@@ -85,7 +79,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
-            priority: editedTask.priority || undefined,
+            priority: editedTask.priority || "medium",
             lastSave: new Date(),
           };
         }
@@ -125,27 +119,17 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
         return message;
       }
     };
-
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [editedTask, open, task]);
 
   return (
     <Dialog
       open={open}
-      onClose={() => {
-        onClose();
-      }}
+      onClose={onClose}
       slotProps={{
         paper: {
-          style: {
-            borderRadius: "24px",
-            padding: "12px",
-            maxWidth: "600px",
-          },
+          style: { borderRadius: "24px", padding: "12px", maxWidth: "600px" },
         },
       }}
     >
@@ -153,7 +137,9 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
         title="Edit Task"
         subTitle={
           editedTask?.lastSave
-            ? `Last edited ${timeAgo(new Date(editedTask.lastSave))} • ${formatDate(new Date(editedTask.lastSave))}`
+            ? `Last edited ${timeAgo(new Date(editedTask.lastSave))} • ${formatDate(
+                new Date(editedTask.lastSave),
+              )}`
             : "Edit the details of the task."
         }
         icon={<EditCalendarRounded />}
@@ -167,6 +153,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           name={editedTask?.name || ""}
           type="task"
         />
+
         <StyledInput
           label="Name"
           name="name"
@@ -184,6 +171,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
               : "Name is required"
           }
         />
+
         <StyledInput
           label="Description"
           name="description"
@@ -195,13 +183,14 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           margin="normal"
           error={descriptionError}
           helperText={
-            editedTask?.description === "" || editedTask?.description === undefined
-              ? undefined
-              : descriptionError
+            editedTask?.description
+              ? descriptionError
                 ? `Description is too long (maximum ${DESCRIPTION_MAX_LENGTH} characters)`
                 : `${editedTask?.description?.length}/${DESCRIPTION_MAX_LENGTH}`
+              : undefined
           }
         />
+
         <StyledInput
           label="Deadline date"
           name="deadline"
@@ -213,21 +202,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           }
           onChange={handleInputChange}
           slotProps={{
-            inputLabel: {
-              shrink: true,
-            },
+            inputLabel: { shrink: true },
             input: {
               startAdornment: editedTask?.deadline ? (
                 <InputAdornment position="start">
                   <Tooltip title="Clear">
                     <IconButton
                       color="error"
-                      onClick={() => {
+                      onClick={() =>
                         setEditedTask((prevTask) => ({
                           ...(prevTask as Task),
                           deadline: undefined,
-                        }));
-                      }}
+                        }))
+                      }
                     >
                       <CancelRounded />
                     </IconButton>
@@ -238,20 +225,17 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           }}
           sx={{
             colorScheme: theme.darkmode ? "dark" : "light",
-            " & .MuiInputBase-root": {
-              transition: ".3s all",
-            },
+            " & .MuiInputBase-root": { transition: ".3s all" },
           }}
         />
 
+        {/* ✅ Priority selection */}
         <StyledInput
           select
           label="Priority"
           name="priority"
           value={editedTask?.priority || "medium"}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            handleInputChange(e);
-          }}
+          onChange={handleInputChange}
           helperText="Select task priority"
         >
           <MenuItem value="low">Low</MenuItem>
@@ -260,31 +244,22 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           <MenuItem value="critical">Critical</MenuItem>
         </StyledInput>
 
-        {settings.enableCategories !== undefined && settings.enableCategories && (
+        {settings.enableCategories && (
           <CategorySelect
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
             selectedCategories={selectedCategories}
-            onCategoryChange={(categories) => setSelectedCategories(categories)}
+            onCategoryChange={setSelectedCategories}
           />
         )}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "8px",
-          }}
-        >
+
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "8px" }}>
           <ColorPicker
             width={"100%"}
             color={editedTask?.color || "#000000"}
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
-            onColorChange={(color) => {
-              setEditedTask((prevTask) => ({
-                ...(prevTask as Task),
-                color: color,
-              }));
-            }}
+            onColorChange={(color) =>
+              setEditedTask((prevTask) => ({ ...(prevTask as Task), color }))
+            }
           />
         </div>
       </DialogContent>
@@ -297,7 +272,6 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             nameError ||
             editedTask?.name === "" ||
             descriptionError ||
-            nameError ||
             JSON.stringify(editedTask) === JSON.stringify(task)
           }
         >
@@ -308,8 +282,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   );
 };
 
-const UnstyledTextField = ({ ...props }: TextFieldProps) => <TextField fullWidth {...props} />;
-
+const UnstyledTextField = (props: TextFieldProps) => <TextField fullWidth {...props} />;
 const StyledInput = styled(UnstyledTextField)`
   margin: 14px 0;
   & .MuiInputBase-root {
