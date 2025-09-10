@@ -9,6 +9,7 @@ import {
   TextField,
   TextFieldProps,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
@@ -84,6 +85,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             description: editedTask.description || undefined,
             deadline: editedTask.deadline || undefined,
             category: editedTask.category || undefined,
+            priority: editedTask.priority || undefined,
             lastSave: new Date(),
           };
         }
@@ -241,6 +243,22 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
             },
           }}
         />
+
+        <StyledInput
+          select
+          label="Priority"
+          name="priority"
+          value={editedTask?.priority || "medium"}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            handleInputChange(e);
+          }}
+          helperText="Select task priority"
+        >
+          <MenuItem value="low">Low</MenuItem>
+          <MenuItem value="medium">Medium</MenuItem>
+          <MenuItem value="high">High</MenuItem>
+          <MenuItem value="critical">Critical</MenuItem>
+        </StyledInput>
 
         {settings.enableCategories !== undefined && settings.enableCategories && (
           <CategorySelect

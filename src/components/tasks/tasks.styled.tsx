@@ -6,7 +6,8 @@ import { ColorPalette } from "../../theme/themeConfig";
 import { getFontColor, isDark, systemInfo } from "../../utils";
 import { reduceMotion } from "../../styles/reduceMotion.styled";
 
-// TODO: move EmojiContainer to top on smaller screens, fix text spacing
+// (NOTE: this file contains many exports used by TaskItem, TaskList, TaskMenu, etc.)
+// Below, I keep your previous exports and add PriorityBadge.
 
 interface TaskComponentProps {
   backgroundColor: string;
@@ -31,12 +32,8 @@ export const TaskContainer = styled.div<TaskComponentProps>`
   border-left: ${({ done }) => (done ? "8px solid #00ff1ee3" : "1px solid transparent")};
   box-shadow: ${(props) =>
     props.glow && !props.blur ? `0 0 128px -20px ${props.backgroundColor}` : "none"};
-  /* text-shadow: ${({ backgroundColor, glow, done }) =>
-    glow && !done ? `0 0 2px ${getFontColor(backgroundColor)}78` : "none"}; */
   filter: ${({ blur }) => (blur ? "blur(2px) opacity(75%)" : "none")};
-  /* animation: ${fadeIn} 0.5s ease-in; */
   backdrop-filter: ${({ done }) => (done ? "blur(6px)" : "none")};
-  /* If the theme color and task color are the same, it changes the selection color to be different. */
   *::selection {
     background-color: ${({ theme, backgroundColor }) =>
       theme.primary === backgroundColor ? "#ffffff" : theme.primary} !important;
@@ -118,6 +115,49 @@ export const TaskDate = styled.p`
   font-style: italic;
   font-weight: 300;
   backdrop-filter: none !important;
+`;
+
+/**
+ * Priority badge displayed next to the task name (small pill)
+ * Levels: low, medium, high, critical
+ */
+export const PriorityBadge = styled.span<{ level?: string }>`
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+
+  background: ${({ level }) =>
+    level === "low"
+      ? "#e6f9ef"
+      : level === "medium"
+        ? "#e8f4ff"
+        : level === "high"
+          ? "#fff4e6"
+          : level === "critical"
+            ? "#ffe9e9"
+            : "#e9ecef"};
+  color: ${({ level }) =>
+    level === "low"
+      ? "#0b8a4a"
+      : level === "medium"
+        ? "#0b63b8"
+        : level === "high"
+          ? "#b35a03"
+          : level === "critical"
+            ? "#b31c1c"
+            : "#333"};
+  @media print {
+    color: black !important;
+    background: #e9e9e9 !important;
+  }
 `;
 
 export const TaskDescription = styled.div<{ done: boolean }>`

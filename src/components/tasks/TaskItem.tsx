@@ -21,6 +21,7 @@ import {
   SharedByContainer,
   TaskActionsContainer,
   DragHandle,
+  PriorityBadge,
 } from "./tasks.styled";
 import { calculateDateDifference, formatDate, getFontColor, systemInfo } from "../../utils";
 import { RenderTaskDescription } from "./RenderTaskDescription";
@@ -166,6 +167,13 @@ export const TaskItem = memo(
           )}
           <TaskHeader>
             <TaskName done={task.done}>{textHighlighter(task.name)}</TaskName>
+
+            {task.priority && (
+              <PriorityBadge level={task.priority}>
+                {`${task.priority.charAt(0).toUpperCase()}${task.priority.slice(1)}`}
+              </PriorityBadge>
+            )}
+
             <Tooltip
               title={
                 moveMode && enableMoveMode

@@ -8,9 +8,9 @@ export type UUID = ReturnType<typeof crypto.randomUUID>;
 export type DarkModeOptions = "system" | "auto" | "light" | "dark";
 
 /**
- * Priority levels for tasks.
+ * Task priority levels
  */
-export type TaskPriority = "low" | "medium" | "high" | "critical";
+export type Priority = "low" | "medium" | "high" | "critical";
 
 /**
  * Represents a user in the application.
@@ -59,13 +59,14 @@ export interface Task {
   lastSave?: Date;
   sharedBy?: string;
   /**
-   * Task priority (default: medium)
-   */
-  priority: TaskPriority;
-  /**
    * Optional numeric position for drag-and-drop (for p2p sync)
    */
   position?: number;
+
+  /**
+   * Priority of the task (optional for backward compatibility)
+   */
+  priority?: Priority;
 }
 
 /**

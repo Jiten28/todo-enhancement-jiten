@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, MenuItem } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -34,6 +34,8 @@ const AddTask = () => {
     "categories",
     "sessionStorage",
   );
+
+  const [priority, setPriority] = useStorageState<Priority>("medium", "priority", "sessionStorage");
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
 
@@ -111,6 +113,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
+      priority,
     };
 
     setUser((prevUser) => ({
@@ -129,7 +132,15 @@ const AddTask = () => {
       },
     );
 
-    const itemsToRemove = ["name", "color", "description", "emoji", "deadline", "categories"];
+    const itemsToRemove = [
+      "name",
+      "color",
+      "description",
+      "emoji",
+      "deadline",
+      "categories",
+      "priority",
+    ];
     itemsToRemove.map((item) => sessionStorage.removeItem(item));
   };
 
@@ -211,6 +222,22 @@ const AddTask = () => {
               },
             }}
           />
+
+          <StyledInput
+            select
+            label="Priority"
+            name="priority"
+            value={priority}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setPriority(e.target.value as Priority)
+            }
+            helperText="Select a priority for this task"
+          >
+            <MenuItem value="low">Low</MenuItem>
+            <MenuItem value="medium">Medium</MenuItem>
+            <MenuItem value="high">High</MenuItem>
+            <MenuItem value="critical">Critical</MenuItem>
+          </StyledInput>
 
           {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
