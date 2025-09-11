@@ -60,6 +60,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import DisabledThemeProvider from "../../contexts/DisabledThemeProvider";
+import { Priority } from "../../types/user.ts";
 
 const TaskMenuButton = memo(
   ({ task, onClick }: { task: Task; onClick: (event: React.MouseEvent<HTMLElement>) => void }) => (
@@ -197,14 +198,32 @@ export const TasksList: React.FC = () => {
             return [...tasks].sort(
               (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
             );
+
           case "dueDate":
             return [...tasks].sort((a, b) => {
               if (!a.deadline) return 1;
               if (!b.deadline) return -1;
               return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
             });
+
           case "alphabetical":
             return [...tasks].sort((a, b) => a.name.localeCompare(b.name));
+
+          case "priority": {
+            const priorityOrder: Record<Priority, number> = {
+              critical: 1,
+              high: 2,
+              medium: 3,
+              low: 4,
+            };
+
+            return [...tasks].sort((a, b) => {
+              const pa = a.priority ? priorityOrder[a.priority] : 99;
+              const pb = b.priority ? priorityOrder[b.priority] : 99;
+              return pa - pb;
+            });
+          }
+
           case "custom":
             return [...tasks].sort((a, b) => {
               if (a.position != null && b.position != null) return a.position - b.position;
