@@ -101,5 +101,5 @@ export interface AppSettings {
   reduceMotion: ReduceMotionOption;
 }
 
-export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom";
+export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom" | "priority";
 export type ReduceMotionOption = "system" | "on" | "off";

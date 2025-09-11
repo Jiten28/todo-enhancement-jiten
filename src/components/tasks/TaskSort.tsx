@@ -4,6 +4,7 @@ import {
   CalendarTodayRounded,
   MoveUpRounded,
   SortByAlphaRounded,
+  PriorityHighRounded,
 } from "@mui/icons-material";
 import { Button, css, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
 import { TaskContext } from "../../contexts/TaskContext";
@@ -30,6 +31,11 @@ const sortOptions: {
     value: "alphabetical",
     label: "Alphabetical",
     icon: <SortByAlphaRounded fontSize="small" />,
+  },
+  {
+    value: "priority",
+    label: "Priority",
+    icon: <PriorityHighRounded fontSize="small" />,
   },
   {
     value: "custom",
