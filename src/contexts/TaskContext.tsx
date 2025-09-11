@@ -1,6 +1,8 @@
 import { Dispatch, ReactNode, SetStateAction, createContext } from "react";
 import type { Category, SortOption, UUID } from "../types/user";
 
+type DateFilterOption = "all" | "today" | "thisWeek" | "custom";
+
 interface TaskState {
   selectedTaskId: UUID | null;
   anchorEl: null | HTMLElement;
@@ -13,6 +15,11 @@ interface TaskState {
   sortOption: SortOption;
   sortAnchorEl: null | HTMLElement;
   moveMode: boolean;
+
+  // date filter
+  dateFilter: DateFilterOption;
+  customDateFrom?: string | null; // ISO date string (yyyy-mm-dd)
+  customDateTo?: string | null;
 }
 
 interface TaskActions {
@@ -33,6 +40,9 @@ interface TaskActions {
   setSortAnchorEl: Dispatch<SetStateAction<null | HTMLElement>>;
   setMoveMode: Dispatch<SetStateAction<boolean>>;
   updateCategory: (category: Partial<Category>) => void;
+  setDateFilter: (filter: DateFilterOption) => void;
+  setCustomDateFrom: (value: string | null) => void;
+  setCustomDateTo: (value: string | null) => void;
 }
 
 export type TaskContextType = TaskState & TaskActions;

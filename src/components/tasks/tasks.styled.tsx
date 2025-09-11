@@ -134,6 +134,27 @@ export const PriorityBadge = styled.span<{ level?: string }>`
   min-width: 56px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 
+  /* small circle before label */
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: ${({ level }) =>
+      level === "low"
+        ? "#0b8a4a"
+        : level === "medium"
+          ? "#0b63b8"
+          : level === "high"
+            ? "#e4790eff"
+            : level === "critical"
+              ? "#d01212ff"
+              : "#999"};
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.03) inset;
+  }
+
   background: ${({ level }) =>
     level === "low"
       ? "#e6f9ef"
@@ -154,6 +175,7 @@ export const PriorityBadge = styled.span<{ level?: string }>`
           : level === "critical"
             ? "#b31c1c"
             : "#333"};
+
   @media print {
     color: black !important;
     background: #e9e9e9 !important;

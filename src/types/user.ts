@@ -12,6 +12,12 @@ export type DarkModeOptions = "system" | "auto" | "light" | "dark";
  */
 export type Priority = "low" | "medium" | "high" | "critical";
 
+export interface PriorityConfig {
+  id: Priority; // e.g. "critical", "high", "medium", "low"
+  label: string; // user-friendly label
+  color: string; // HEX color or theme color
+}
+
 /**
  * Represents a user in the application.
  */
@@ -37,6 +43,7 @@ export interface User {
   theme: "system" | (string & {});
   darkmode: DarkModeOptions;
   lastSyncedAt?: Date;
+  priorityList: PriorityConfig[];
 }
 
 /**
@@ -99,7 +106,20 @@ export interface AppSettings {
   voiceVolume: number;
   sortOption: SortOption;
   reduceMotion: ReduceMotionOption;
+  priorityList?: PriorityDefinition[];
 }
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom" | "priority";
 export type ReduceMotionOption = "system" | "on" | "off";
+
+/**
+ * Priority meta that can be customized by user settings
+ */
+export interface PriorityDefinition {
+  /** internal id (eg. "low","medium","high","critical" or custom) */
+  id: string;
+  /** label to show in UI (eg. "Medium") */
+  label: string;
+  /** hex color code for the priority */
+  color: string;
+}

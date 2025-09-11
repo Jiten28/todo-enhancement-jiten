@@ -2,9 +2,6 @@ import { EmojiStyle } from "emoji-picker-react";
 import type { User } from "../types/user";
 import { systemInfo } from "../utils";
 
-/**
- * Represents a default user object.
- */
 export const defaultUser: User = {
   name: null,
   createdAt: new Date(),
@@ -58,7 +55,6 @@ export const defaultUser: User = {
   ],
   deletedCategories: [],
   favoriteCategories: ["ebe6ce8b-471f-4632-a23b-578e1038ce51"],
-  //TODO: make default colors better
   colorList: [
     "#FF69B4",
     "#FF22B4",
@@ -73,5 +69,11 @@ export const defaultUser: User = {
     "#FF9518",
     "#FF5018",
     "#FF2F2F",
+  ],
+  priorityList: [
+    { id: "critical", label: "Critical", color: "#d32f2f" },
+    { id: "high", label: "High", color: "#f57c00" },
+    { id: "medium", label: "Medium", color: "#1976d2" },
+    { id: "low", label: "Low", color: "#388e3c" },
   ],
 };
