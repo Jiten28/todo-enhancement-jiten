@@ -91,6 +91,9 @@ export const TaskItem = memo(
 
     if (!task) return null;
 
+    // ✅ Get live priority details from UserContext
+    const priority = user.priorityList.find((p) => p.id === task.priority)!;
+
     return (
       <TaskContainer
         ref={(node) => {
@@ -163,12 +166,8 @@ export const TaskItem = memo(
           <TaskHeader>
             <TaskName done={task.done}>{textHighlighter(task.name)}</TaskName>
 
-            {/* ✅ Priority badge inline with task name */}
-            {task.priority && (
-              <PriorityBadge level={task.priority}>
-                {`${task.priority.charAt(0).toUpperCase()}${task.priority.slice(1)}`}
-              </PriorityBadge>
-            )}
+            {/* ✅ Priority badge uses dynamic user-defined color & label */}
+            {priority && <PriorityBadge color={priority.color}>{priority.label}</PriorityBadge>}
 
             <Tooltip
               title={

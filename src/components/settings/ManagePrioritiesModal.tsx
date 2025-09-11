@@ -11,9 +11,11 @@ import {
   ListItem,
   ListItemText,
   ListItemSecondaryAction,
+  Popover,
+  Box,
 } from "@mui/material";
 import { DragIndicator, Delete } from "@mui/icons-material";
-import { SketchPicker, ColorResult } from "react-color"; // ✅ with type support
+import { SketchPicker, ColorResult } from "react-color";
 import { UserContext } from "../../contexts/UserContext";
 import { PriorityConfig } from "../../types/user";
 import {
@@ -34,6 +36,8 @@ interface Props {
 export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
   const { user, setUser } = useContext(UserContext);
   const [localPriorities, setLocalPriorities] = useState<PriorityConfig[]>(user.priorityList);
+  const [editingColor, setEditingColor] = useState<PriorityConfig | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -57,6 +61,19 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
     setLocalPriorities((prev) => arrayMove(prev, oldIndex, newIndex));
   };
 
+  const handleColorClick = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    priority: PriorityConfig,
+  ) => {
+    setEditingColor(priority);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setEditingColor(null);
+    setAnchorEl(null);
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Manage Priorities</DialogTitle>
@@ -77,7 +94,7 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
           >
             <List>
               {localPriorities.map((priority) => (
-                <ListItem key={priority.id} sx={{ bgcolor: "#f5f5f5", mb: 1, borderRadius: 2 }}>
+                <ListItem key={priority.id} sx={{ bgcolor: "#f5f5f5a2", mb: 1, borderRadius: 2 }}>
                   <DragIndicator sx={{ mr: 1, cursor: "grab" }} />
                   <ListItemText
                     primary={
@@ -87,17 +104,32 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
                         variant="standard"
                       />
                     }
-                    secondary={
-                      <SketchPicker
-                        color={priority.color}
-                        onChangeComplete={(c: ColorResult) => handleColorChange(priority.id, c.hex)}
-                        width="200px"
-                      />
-                    }
                   />
+                  {/* Fixed size circle button */}
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <IconButton onClick={(e) => handleColorClick(e, priority)}>
+                      <Box
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          bgcolor: priority.color,
+                          border: "1px solid #ccc",
+                        }}
+                      />
+                    </IconButton>
+                  </Box>
                   <ListItemSecondaryAction>
                     <IconButton edge="end" disabled>
-                      <Delete /> {/* keep disabled to avoid removing all 4 */}
+                      <Delete />
                     </IconButton>
                   </ListItemSecondaryAction>
                 </ListItem>
@@ -112,6 +144,22 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
           Save
         </Button>
       </DialogActions>
+
+      {/* One global Popover, outside of ListItems (fixes shifting) */}
+      <Popover
+        open={!!editingColor}
+        anchorEl={anchorEl}
+        onClose={handleClosePopover}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        {editingColor && (
+          <SketchPicker
+            color={editingColor.color}
+            onChangeComplete={(c: ColorResult) => handleColorChange(editingColor.id, c.hex)}
+          />
+        )}
+      </Popover>
     </Dialog>
   );
 };

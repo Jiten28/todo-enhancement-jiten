@@ -5,6 +5,7 @@ import {
   PaletteRounded,
   RecordVoiceOverRounded,
   SettingsRounded,
+  FlagRounded,
 } from "@mui/icons-material";
 import {
   Box,
@@ -30,9 +31,9 @@ import { CustomDialogTitle, TabGroupProvider } from "..";
 import { UserContext } from "../../contexts/UserContext";
 import { useResponsiveDisplay } from "../../hooks/useResponsiveDisplay";
 import { CloseButton, CloseButtonContainer, StyledTab, StyledTabPanel } from "./settings.styled";
-import { useNavigate } from "react-router-dom";
 import { showToast } from "../../utils";
 
+// ⚡ settings tabs
 const settingsTabs: {
   label: string;
   icon: ReactElement;
@@ -54,7 +55,7 @@ const settingsTabs: {
     Component: lazy(() => import("./tabs/EmojiTab")),
   },
   {
-    label: "Read Aloud",
+    label: "ReadAloud",
     icon: <RecordVoiceOverRounded />,
     Component: lazy(() => import("./tabs/ReadAloudTab")),
   },
@@ -64,20 +65,23 @@ const settingsTabs: {
     Component: lazy(() => import("./tabs/ShortcutsTab")),
   },
   {
+    label: "Priorities", // ✅ integrated priorities tab
+    icon: <FlagRounded />,
+    Component: lazy(() => import("./tabs/PrioritiesTab")),
+  },
+  {
     label: "About",
     icon: <InfoRounded />,
     Component: lazy(() => import("./tabs/AboutTab")),
   },
 ];
 
-// hash routing utils
+// utils
 const createTabSlug = (label: string): string => label.replace(/\s+/g, "");
-
 const navigateToTab = (tabIndex: number): void => {
   const tabSlug = createTabSlug(settingsTabs[tabIndex].label);
   window.location.hash = `#settings/${tabSlug}`;
 };
-
 const replaceWithTab = (tabIndex: number): void => {
   const tabSlug = createTabSlug(settingsTabs[tabIndex].label);
   history.replaceState(
@@ -86,7 +90,6 @@ const replaceWithTab = (tabIndex: number): void => {
     `${window.location.pathname}${window.location.search}#settings/${tabSlug}`,
   );
 };
-
 const isSettingsHash = (hash: string): boolean => /^#settings(\/.*)?$/.test(hash);
 
 interface SettingsProps {
@@ -98,7 +101,6 @@ interface SettingsProps {
 export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => {
   const { user } = useContext(UserContext);
   const [tabValue, setTabValue] = useState<number>(0);
-  const navigate = useNavigate();
   const isMobile = useResponsiveDisplay();
   const muiTheme = useTheme();
 
@@ -115,7 +117,7 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
     navigateToTab(newValue);
   };
 
-  // validate tab
+  // validate tab from hash
   const handleHashChange = useCallback(() => {
     const hash = window.location.hash;
 
@@ -131,7 +133,7 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
     }
 
     const match = hash.match(/^#settings\/(\w+)/);
-    if (!match) return -1;
+    if (!match) return;
 
     const slug = match[1];
     const tabIndex = settingsTabs.findIndex((tab) => createTabSlug(tab.label) === slug);
@@ -139,14 +141,11 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
     if (tabIndex !== -1) {
       setTabValue(tabIndex);
     } else {
-      const invalidSlug = hash.match(/^#settings\/(\w+)/)?.[1];
-      if (invalidSlug) {
-        showToast(`Invalid settings tab: "${invalidSlug}". Redirecting to default tab.`, {
-          type: "error", // TODO: add warning type
-        });
-        replaceWithTab(0);
-        setTabValue(0);
-      }
+      showToast(`Invalid settings tab: "${slug}". Redirecting to default tab.`, {
+        type: "error",
+      });
+      replaceWithTab(0);
+      setTabValue(0);
     }
   }, [onClose]);
 
@@ -161,9 +160,7 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
       handleHashChange();
       handleHashOpen();
     };
-
     onHashChange();
-
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, [handleHashChange, handleHashOpen]);
@@ -177,13 +174,12 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
     }
   }, [open]);
 
-  // theme color management
+  // theme color
   useEffect(() => {
     const themeColorMeta = document.querySelector("meta[name=theme-color]");
     const defaultThemeColor = muiTheme.palette.secondary.main;
 
     if (themeColorMeta) {
-      // ensure this runs after App.tsx useEffect to override theme-color
       setTimeout(() => {
         if (open) {
           themeColorMeta.setAttribute(
@@ -197,19 +193,18 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
     }
   }, [muiTheme.palette.mode, muiTheme.palette.secondary.main, open, user.theme, user.darkmode]);
 
+  // ctrl/cmd+p print shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "p") {
         e.preventDefault();
         handleDialogClose();
-        navigate("/");
         setTimeout(() => window.print(), 500);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigate, handleDialogClose]);
+  }, [handleDialogClose]);
 
   return (
     <Dialog
@@ -233,7 +228,7 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
       <CustomDialogTitle
         icon={<SettingsRounded />}
         title="Settings"
-        subTitle="Manage Your settings and preferences"
+        subTitle="Manage your preferences"
         onClose={handleDialogClose}
         removeDivider
       />
@@ -245,10 +240,7 @@ export const SettingsDialog = ({ open, onClose, handleOpen }: SettingsProps) => 
           onChange={handleTabChange}
           variant="scrollable"
           aria-label="Settings tabs"
-          sx={{
-            borderRight: 1,
-            borderColor: "divider",
-          }}
+          sx={{ borderRight: 1, borderColor: "divider" }}
         >
           {settingsTabs.map((tab, index) => (
             <StyledTab icon={tab.icon} label={tab.label} {...a11yProps(index)} key={index} />

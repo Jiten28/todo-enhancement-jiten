@@ -24,16 +24,9 @@ export interface PriorityConfig {
 export interface User {
   name: string | null;
   createdAt: Date;
-  /**
-   * must be a URL starting with "https://" or a local file reference in the form "LOCAL_FILE_" + UUID
-   */
-  profilePicture: string | null;
+  profilePicture: string | null; // must be URL or LOCAL_FILE_UUID
   emojisStyle: EmojiStyle;
   tasks: Task[];
-  /**
-   * Stores the IDs of tasks that were deleted locally.
-   * Used to ensure deletions are synced correctly across devices.
-   */
   deletedTasks: UUID[];
   categories: Category[];
   deletedCategories: UUID[];
@@ -43,6 +36,8 @@ export interface User {
   theme: "system" | (string & {});
   darkmode: DarkModeOptions;
   lastSyncedAt?: Date;
+
+  /** ✅ single source of truth for priorities */
   priorityList: PriorityConfig[];
 }
 
@@ -57,23 +52,19 @@ export interface Task {
   description?: string;
   emoji?: string;
   color: string;
-  /**
-   * created at date
-   */
+
+  /** created at date */
   date: Date;
   deadline?: Date;
   category?: Category[];
   lastSave?: Date;
   sharedBy?: string;
-  /**
-   * Optional numeric position for drag-and-drop (for p2p sync)
-   */
+
+  /** Optional numeric position for drag-and-drop (for p2p sync) */
   position?: number;
 
-  /**
-   * Priority of the task
-   */
-  priority: Priority; // <- made strongly required instead of optional
+  /** ✅ Always required priority */
+  priority: Priority;
 }
 
 /**
@@ -98,28 +89,12 @@ export interface AppSettings {
   enableReadAloud: boolean;
   appBadge: boolean;
   showProgressBar: boolean;
-  /**
-   * Voice property in the format 'name::lang' to ensure uniqueness on macOS/iOS,
-   * where multiple voices can share the same name.
-   */
   voice: `${string}::${string}`;
   voiceVolume: number;
   sortOption: SortOption;
   reduceMotion: ReduceMotionOption;
-  priorityList?: PriorityDefinition[];
 }
 
 export type SortOption = "dateCreated" | "dueDate" | "alphabetical" | "custom" | "priority";
-export type ReduceMotionOption = "system" | "on" | "off";
 
-/**
- * Priority meta that can be customized by user settings
- */
-export interface PriorityDefinition {
-  /** internal id (eg. "low","medium","high","critical" or custom) */
-  id: string;
-  /** label to show in UI (eg. "Medium") */
-  label: string;
-  /** hex color code for the priority */
-  color: string;
-}
+export type ReduceMotionOption = "system" | "on" | "off";

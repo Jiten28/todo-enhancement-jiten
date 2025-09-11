@@ -119,9 +119,9 @@ export const TaskDate = styled.p`
 
 /**
  * Priority badge displayed next to the task name (small pill)
- * Levels: low, medium, high, critical
+ * Uses dynamic color passed from TaskItem
  */
-export const PriorityBadge = styled.span<{ level?: string }>`
+export const PriorityBadge = styled.span<{ color: string }>`
   margin-left: 8px;
   padding: 4px 8px;
   border-radius: 12px;
@@ -132,9 +132,12 @@ export const PriorityBadge = styled.span<{ level?: string }>`
   align-items: center;
   justify-content: center;
   min-width: 56px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 
-  /* small circle before label */
+  /* ✅ solid background for strong contrast */
+  background: ${({ color }) => color};
+  color: #ffffffdd; /* ✅ always white text for visibility */
+
   &::before {
     content: "";
     display: inline-block;
@@ -142,39 +145,9 @@ export const PriorityBadge = styled.span<{ level?: string }>`
     height: 10px;
     margin-right: 8px;
     border-radius: 50%;
-    background: ${({ level }) =>
-      level === "low"
-        ? "#0b8a4a"
-        : level === "medium"
-          ? "#0b63b8"
-          : level === "high"
-            ? "#e4790eff"
-            : level === "critical"
-              ? "#d01212ff"
-              : "#999"};
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.03) inset;
+    background: rgba(255, 255, 255, 0.85); /* ✅ contrast dot */
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.22) inset;
   }
-
-  background: ${({ level }) =>
-    level === "low"
-      ? "#e6f9ef"
-      : level === "medium"
-        ? "#e8f4ff"
-        : level === "high"
-          ? "#fff4e6"
-          : level === "critical"
-            ? "#ffe9e9"
-            : "#e9ecef"};
-  color: ${({ level }) =>
-    level === "low"
-      ? "#0b8a4a"
-      : level === "medium"
-        ? "#0b63b8"
-        : level === "high"
-          ? "#b35a03"
-          : level === "critical"
-            ? "#b31c1c"
-            : "#333"};
 
   @media print {
     color: black !important;

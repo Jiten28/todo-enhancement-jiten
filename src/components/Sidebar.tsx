@@ -35,7 +35,7 @@ import {
 } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CustomDialogTitle, LogoutDialog, SettingsDialog } from ".";
+import { CustomDialogTitle, LogoutDialog } from ".";
 import bmcLogoLight from "../assets/bmc-logo-light.svg";
 import bmcLogo from "../assets/bmc-logo.svg";
 import { defaultUser } from "../constants/defaultUser";
@@ -45,6 +45,7 @@ import { fetchGitHubInfo } from "../services/githubApi";
 import { DialogBtn, UserAvatar, pulseAnimation, reduceMotion, ring } from "../styles";
 import { ColorPalette } from "../theme/themeConfig";
 import { getProfilePictureFromDB, showToast, systemInfo, timeAgo } from "../utils";
+import { SettingsDialog } from "./settings/SettingsDialog";
 
 export const ProfileSidebar = () => {
   const { user, setUser } = useContext(UserContext);
@@ -52,13 +53,30 @@ export const ProfileSidebar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [openLogoutDialog, setOpenLogoutDialog] = useState<boolean>(false);
-  const [openSettings, setOpenSettings] = useState<boolean>(false);
 
   const [stars, setStars] = useState<number | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
   const [issuesCount, setIssuesCount] = useState<number | null>(null);
 
   const [bmcSupporters, setBmcSupporters] = useState<number | null>(null);
+
+  const [openSettings, setOpenSettings] = useState(false);
+
+  // auto-open if hash already has #settings
+  useEffect(() => {
+    if (window.location.hash.startsWith("#settings")) {
+      setOpenSettings(true);
+    }
+    const handleHashChange = () => {
+      if (window.location.hash.startsWith("#settings")) {
+        setOpenSettings(true);
+      } else {
+        setOpenSettings(false);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   const theme = useTheme();
   const n = useNavigate();
@@ -397,8 +415,8 @@ export const ProfileSidebar = () => {
           <SettingsMenuItem
             tabIndex={0}
             onClick={() => {
-              setOpenSettings(true);
               handleClose();
+              window.location.hash = "#settings";
             }}
           >
             <SettingsRounded className="SettingsRoundedIcon" /> &nbsp; Settings
@@ -474,7 +492,10 @@ export const ProfileSidebar = () => {
       <LogoutDialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)} />
       <SettingsDialog
         open={openSettings}
-        onClose={() => setOpenSettings(false)}
+        onClose={() => {
+          setOpenSettings(false);
+          window.location.hash = ""; // clear hash when closed
+        }}
         handleOpen={() => setOpenSettings(true)}
       />
     </Container>

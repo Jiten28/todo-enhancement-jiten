@@ -26,8 +26,18 @@ export const defaultUser: User = {
     reduceMotion: "system",
   },
   categories: [
-    { id: "857f0db6-43b2-43eb-8143-ec4e26472516", name: "Home", emoji: "1f3e0", color: "#53e45d" },
-    { id: "0292cba5-f6e2-41c4-b5a7-c59a0aaecfe3", name: "Work", emoji: "1f3e2", color: "#248eff" },
+    {
+      id: "857f0db6-43b2-43eb-8143-ec4e26472516",
+      name: "Home",
+      emoji: "1f3e0",
+      color: "#53e45d",
+    },
+    {
+      id: "0292cba5-f6e2-41c4-b5a7-c59a0aaecfe3",
+      name: "Work",
+      emoji: "1f3e2",
+      color: "#248eff",
+    },
     {
       id: "ebe6ce8b-471f-4632-a23b-578e1038ce51",
       name: "Coding",
@@ -70,6 +80,7 @@ export const defaultUser: User = {
     "#FF5018",
     "#FF2F2F",
   ],
+  /** ✅ canonical priority list */
   priorityList: [
     { id: "critical", label: "Critical", color: "#d32f2f" },
     { id: "high", label: "High", color: "#f57c00" },
