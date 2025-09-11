@@ -1,5 +1,5 @@
 import { Dispatch, ReactNode, SetStateAction, createContext } from "react";
-import type { Category, SortOption, UUID } from "../types/user";
+import type { Category, SortOption, UUID, Task } from "../types/user";
 
 type DateFilterOption = "all" | "today" | "thisWeek" | "custom";
 
@@ -18,8 +18,11 @@ interface TaskState {
 
   // date filter
   dateFilter: DateFilterOption;
-  customDateFrom?: string | null; // ISO date string (yyyy-mm-dd)
+  customDateFrom?: string | null;
   customDateTo?: string | null;
+
+  // ✅ edit state
+  editingTask: Task | null;
 }
 
 interface TaskActions {
@@ -43,6 +46,9 @@ interface TaskActions {
   setDateFilter: (filter: DateFilterOption) => void;
   setCustomDateFrom: (value: string | null) => void;
   setCustomDateTo: (value: string | null) => void;
+
+  // ✅ edit actions
+  setEditingTask: Dispatch<SetStateAction<Task | null>>;
 }
 
 export type TaskContextType = TaskState & TaskActions;

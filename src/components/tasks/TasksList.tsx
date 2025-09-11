@@ -18,6 +18,7 @@ import { getFontColor } from "../../utils";
 import { NoTasks, SearchClear, SearchInput, TasksContainer } from "./tasks.styled";
 import { TaskMenu } from "./TaskMenu";
 import { TaskSort } from "./TaskSort";
+import { DateFilter } from "./DateFilter";
 import {
   DndContext,
   DragEndEvent,
@@ -34,6 +35,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import DisabledThemeProvider from "../../contexts/DisabledThemeProvider";
+import { EditTask } from "./EditTask";
 
 const TaskMenuButton = memo(
   ({ task, onClick }: { task: Task; onClick: (event: React.MouseEvent<HTMLElement>) => void }) => (
@@ -65,6 +67,12 @@ export const TasksList: React.FC = () => {
     setDeleteDialogOpen,
     sortOption,
     moveMode,
+    editModalOpen,
+    setEditModalOpen,
+    editingTask,
+    dateFilter,
+    customDateFrom,
+    customDateTo,
   } = useContext(TaskContext);
 
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
@@ -99,12 +107,13 @@ export const TasksList: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Reorder tasks based on filters/sort
+  // Reorder + filter tasks
   const reorderTasks = useCallback(
     (tasks: Task[]): Task[] => {
       let pinnedTasks = tasks.filter((t) => t.pinned);
       let unpinnedTasks = tasks.filter((t) => !t.pinned);
 
+      // ✅ Category filter
       if (selectedCatId !== undefined) {
         const categoryFilter = (t: Task) =>
           t.category?.some((c) => c.id === selectedCatId) ?? false;
@@ -112,6 +121,7 @@ export const TasksList: React.FC = () => {
         unpinnedTasks = unpinnedTasks.filter(categoryFilter);
       }
 
+      // ✅ Search filter
       const searchLower = search.toLowerCase();
       const searchFilter = (t: Task) =>
         t.name.toLowerCase().includes(searchLower) ||
@@ -119,6 +129,33 @@ export const TasksList: React.FC = () => {
       pinnedTasks = pinnedTasks.filter(searchFilter);
       unpinnedTasks = unpinnedTasks.filter(searchFilter);
 
+      // ✅ Date filter
+      if (dateFilter === "today") {
+        const today = new Date().toDateString();
+        const dateFilterFn = (t: Task) =>
+          t.deadline ? new Date(t.deadline).toDateString() === today : false;
+        pinnedTasks = pinnedTasks.filter(dateFilterFn);
+        unpinnedTasks = unpinnedTasks.filter(dateFilterFn);
+      } else if (dateFilter === "thisWeek") {
+        const now = new Date();
+        const start = new Date(now);
+        start.setDate(now.getDate() - now.getDay()); // Sunday
+        const end = new Date(start);
+        end.setDate(start.getDate() + 7); // Next Sunday
+        const dateFilterFn = (t: Task) =>
+          t.deadline ? new Date(t.deadline) >= start && new Date(t.deadline) < end : false;
+        pinnedTasks = pinnedTasks.filter(dateFilterFn);
+        unpinnedTasks = unpinnedTasks.filter(dateFilterFn);
+      } else if (dateFilter === "custom" && customDateFrom && customDateTo) {
+        const start = new Date(customDateFrom);
+        const end = new Date(customDateTo);
+        const dateFilterFn = (t: Task) =>
+          t.deadline ? new Date(t.deadline) >= start && new Date(t.deadline) <= end : false;
+        pinnedTasks = pinnedTasks.filter(dateFilterFn);
+        unpinnedTasks = unpinnedTasks.filter(dateFilterFn);
+      }
+
+      // ✅ Sorting
       const sortTasks = (arr: Task[]) => {
         switch (sortOption) {
           case "dateCreated":
@@ -157,6 +194,7 @@ export const TasksList: React.FC = () => {
       pinnedTasks = sortTasks(pinnedTasks);
       unpinnedTasks = sortTasks(unpinnedTasks);
 
+      // ✅ Move done tasks to bottom if enabled
       if (user.settings?.doneToBottom) {
         const done = unpinnedTasks.filter((t) => t.done);
         const notDone = unpinnedTasks.filter((t) => !t.done);
@@ -164,7 +202,7 @@ export const TasksList: React.FC = () => {
       }
       return [...pinnedTasks, ...unpinnedTasks];
     },
-    [search, selectedCatId, sortOption, user.settings?.doneToBottom],
+    [search, selectedCatId, sortOption, user.settings, dateFilter, customDateFrom, customDateTo],
   );
 
   const orderedTasks = useMemo(() => reorderTasks(user.tasks), [user.tasks, reorderTasks]);
@@ -209,10 +247,19 @@ export const TasksList: React.FC = () => {
   return (
     <>
       <TaskMenu />
+
+      {/* ✅ Edit Modal */}
+      <EditTask
+        open={editModalOpen}
+        task={editingTask || undefined}
+        onClose={() => setEditModalOpen(false)}
+      />
+
       <TasksContainer style={{ marginTop: user.settings.showProgressBar ? "0" : "24px" }}>
         {user.tasks.length > 0 && (
           <Box sx={{ display: "flex", alignItems: "center", gap: "10px", mb: "8px" }}>
             <DisabledThemeProvider>
+              {/* 🔍 Search Input */}
               <SearchInput
                 inputRef={searchRef}
                 color="primary"
@@ -238,6 +285,10 @@ export const TasksList: React.FC = () => {
                   },
                 }}
               />
+
+              {/* 📅 Date Filter */}
+              <DateFilter />
+
               <TaskSort />
             </DisabledThemeProvider>
           </Box>
@@ -307,7 +358,7 @@ export const TasksList: React.FC = () => {
         )}
       </TasksContainer>
 
-      {/* Delete Dialogs */}
+      {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onClose={cancelDeleteTask}>
         <CustomDialogTitle
           title="Delete Task"

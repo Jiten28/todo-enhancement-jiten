@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddTaskButton, Container, StyledInput } from "../styles";
 import { AddTaskRounded, CancelRounded } from "@mui/icons-material";
-import { IconButton, InputAdornment, Tooltip, MenuItem } from "@mui/material";
+import { IconButton, InputAdornment, Tooltip, Chip } from "@mui/material";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../constants";
 import { ColorPicker, TopBar, CustomEmojiPicker } from "../components";
 import { UserContext } from "../contexts/UserContext";
@@ -18,6 +18,7 @@ import { useToasterStore } from "react-hot-toast";
 const AddTask = () => {
   const { user, setUser } = useContext(UserContext);
   const theme = useTheme();
+
   const [name, setName] = useStorageState<string>("", "name", "sessionStorage");
   const [emoji, setEmoji] = useStorageState<string | null>(null, "emoji", "sessionStorage");
   const [color, setColor] = useStorageState<string>(theme.primary, "color", "sessionStorage");
@@ -29,13 +30,15 @@ const AddTask = () => {
   const [deadline, setDeadline] = useStorageState<string>("", "deadline", "sessionStorage");
   const [nameError, setNameError] = useState<string>("");
   const [descriptionError, setDescriptionError] = useState<string>("");
+
   const [selectedCategories, setSelectedCategories] = useStorageState<Category[]>(
     [],
     "categories",
     "sessionStorage",
   );
 
-  const [priority, setPriority] = useStorageState<Priority>("medium", "priority", "sessionStorage");
+  // ✅ Default priority is always "low"
+  const [priority, setPriority] = useStorageState<Priority>("low", "priority", "sessionStorage");
 
   const [isDeadlineFocused, setIsDeadlineFocused] = useState<boolean>(false);
 
@@ -61,32 +64,6 @@ const AddTask = () => {
     }
   }, [description.length, name.length]);
 
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = event.target.value;
-    setName(newName);
-    if (newName.length > TASK_NAME_MAX_LENGTH) {
-      setNameError(`Name should be less than or equal to ${TASK_NAME_MAX_LENGTH} characters`);
-    } else {
-      setNameError("");
-    }
-  };
-
-  const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newDescription = event.target.value;
-    setDescription(newDescription);
-    if (newDescription.length > DESCRIPTION_MAX_LENGTH) {
-      setDescriptionError(
-        `Description should be less than or equal to ${DESCRIPTION_MAX_LENGTH} characters`,
-      );
-    } else {
-      setDescriptionError("");
-    }
-  };
-
-  const handleDeadlineChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDeadline(event.target.value);
-  };
-
   const handleAddTask = () => {
     if (name === "") {
       showToast("Task name is required.", {
@@ -99,7 +76,7 @@ const AddTask = () => {
     }
 
     if (nameError !== "" || descriptionError !== "") {
-      return; // Do not add the task if the name or description exceeds the maximum length
+      return; // stop if errors exist
     }
 
     const newTask: Task = {
@@ -113,7 +90,7 @@ const AddTask = () => {
       date: new Date(),
       deadline: deadline !== "" ? new Date(deadline) : undefined,
       category: selectedCategories ? selectedCategories : [],
-      priority,
+      priority, // ✅ saved priority
     };
 
     setUser((prevUser) => ({
@@ -155,15 +132,12 @@ const AddTask = () => {
           name={name}
           type="task"
         />
-        {/* fix for input colors */}
         <InputThemeProvider>
           <StyledInput
             label="Task Name"
-            name="name"
             placeholder="Enter task name"
-            autoComplete="off"
             value={name}
-            onChange={handleNameChange}
+            onChange={(e) => setName(e.target.value)}
             required
             error={nameError !== ""}
             helpercolor={nameError && ColorPalette.red}
@@ -177,11 +151,9 @@ const AddTask = () => {
           />
           <StyledInput
             label="Task Description"
-            name="name"
             placeholder="Enter task description"
-            autoComplete="off"
             value={description}
-            onChange={handleDescriptionChange}
+            onChange={(e) => setDescription(e.target.value)}
             multiline
             rows={4}
             error={descriptionError !== ""}
@@ -196,14 +168,12 @@ const AddTask = () => {
           />
           <StyledInput
             label="Task Deadline"
-            name="name"
-            placeholder="Enter deadline date"
             type="datetime-local"
             value={deadline}
-            onChange={handleDeadlineChange}
+            onChange={(e) => setDeadline(e.target.value)}
             onFocus={() => setIsDeadlineFocused(true)}
             onBlur={() => setIsDeadlineFocused(false)}
-            hidetext={(!deadline || deadline === "") && !isDeadlineFocused} // fix for label overlapping with input
+            hidetext={(!deadline || deadline === "") && !isDeadlineFocused}
             sx={{
               colorScheme: isDark(theme.secondary) ? "dark" : "light",
             }}
@@ -223,25 +193,30 @@ const AddTask = () => {
             }}
           />
 
-          <StyledInput
-            select
-            label="Priority"
-            name="priority"
-            value={priority}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setPriority(e.target.value as Priority)
-            }
-            helperText="Select a priority for this task"
-          >
-            <MenuItem value="low">Low</MenuItem>
-            <MenuItem value="medium">Medium</MenuItem>
-            <MenuItem value="high">High</MenuItem>
-            <MenuItem value="critical">Critical</MenuItem>
-          </StyledInput>
+          {/* ✅ Priority Chips */}
+          <div style={{ margin: "16px 0" }}>
+            <p style={{ marginBottom: "8px", fontWeight: 600 }}>Priority</p>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {user.priorityList.map((p) => (
+                <Chip
+                  key={p.id}
+                  label={p.label}
+                  onClick={() => setPriority(p.id as Priority)}
+                  style={{
+                    backgroundColor: p.color,
+                    color: "#fff",
+                    fontWeight: 600,
+                    border: priority === p.id ? "3px solid #000000c3" : "none",
+                    boxShadow:
+                      priority === p.id ? "0 0 8px rgba(0,0,0,0.4)" : "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
 
-          {user.settings.enableCategories !== undefined && user.settings.enableCategories && (
+          {user.settings.enableCategories && (
             <div style={{ marginBottom: "14px" }}>
-              <br />
               <CategorySelect
                 selectedCategories={selectedCategories}
                 onCategoryChange={(categories) => setSelectedCategories(categories)}
@@ -254,9 +229,7 @@ const AddTask = () => {
         <ColorPicker
           color={color}
           width="400px"
-          onColorChange={(color) => {
-            setColor(color);
-          }}
+          onColorChange={(color) => setColor(color)}
           fontColor={getFontColor(theme.secondary)}
         />
         <AddTaskButton

@@ -44,6 +44,7 @@ export const TaskMenu = () => {
     multipleSelectedTasks,
     handleSelectTask,
     setEditModalOpen,
+    setEditingTask,
     handleDeleteTask,
     handleCloseMoreMenu,
     moveMode,
@@ -337,10 +338,10 @@ export const TaskMenu = () => {
     </StyledMenuItem>,
 
     <Divider key="divider-1" />,
-
     <StyledMenuItem
       key="edit"
       onClick={() => {
+        setEditingTask(selectedTask);
         setEditModalOpen(true);
         handleCloseMoreMenu();
       }}

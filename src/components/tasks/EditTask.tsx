@@ -1,3 +1,4 @@
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { CancelRounded, EditCalendarRounded, SaveRounded } from "@mui/icons-material";
 import {
@@ -11,7 +12,6 @@ import {
   Tooltip,
   MenuItem,
 } from "@mui/material";
-import { useContext, useEffect, useMemo, useState } from "react";
 import { ColorPicker, CustomDialogTitle, CustomEmojiPicker } from "..";
 import { DESCRIPTION_MAX_LENGTH, TASK_NAME_MAX_LENGTH } from "../../constants";
 import { UserContext } from "../../contexts/UserContext";
@@ -28,7 +28,7 @@ interface EditTaskProps {
   onClose: () => void;
 }
 
-export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
+export const EditTask: React.FC<EditTaskProps> = ({ open, task, onClose }) => {
   const { user, setUser } = useContext(UserContext);
   const { settings } = user;
   const [editedTask, setEditedTask] = useState<Task | undefined>(task);
@@ -36,6 +36,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const theme = useTheme();
 
+  // Validation
   const nameError = useMemo(
     () => (editedTask?.name ? editedTask.name.length > TASK_NAME_MAX_LENGTH : undefined),
     [editedTask?.name],
@@ -46,49 +47,56 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
     [editedTask?.description],
   );
 
+  // Reset state when task changes
   useEffect(() => {
-    setEditedTask((prevTask) => ({
-      ...(prevTask as Task),
-      emoji: emoji || undefined,
-    }));
+    if (task) {
+      setEditedTask(task);
+      setEmoji(task.emoji || null);
+      setSelectedCategories(task.category || []);
+    }
+  }, [task]);
+
+  // Sync emoji into task
+  useEffect(() => {
+    if (emoji !== null) {
+      setEditedTask((prev) => (prev ? { ...prev, emoji } : prev));
+    }
   }, [emoji]);
 
+  // Sync categories into task
   useEffect(() => {
-    setEditedTask(task);
-    setSelectedCategories(task?.category as Category[]);
-  }, [task]);
+    setEditedTask((prev) => (prev ? { ...prev, category: selectedCategories } : prev));
+  }, [selectedCategories]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setEditedTask((prevTask) => ({
-      ...(prevTask as Task),
-      [name]: value,
-    }));
+    setEditedTask((prev) => {
+      if (!prev) return prev;
+      if (name === "deadline") {
+        return { ...prev, deadline: value ? new Date(value) : undefined };
+      }
+      if (name === "priority") {
+        return { ...prev, priority: value as Task["priority"] };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const handleSave = () => {
     document.body.style.overflow = "auto";
     if (editedTask && !nameError && !descriptionError) {
-      const updatedTasks = user.tasks.map((task) => {
-        if (task.id === editedTask.id) {
-          return {
-            ...task,
-            name: editedTask.name,
-            color: editedTask.color,
-            emoji: editedTask.emoji || undefined,
-            description: editedTask.description || undefined,
-            deadline: editedTask.deadline || undefined,
-            category: editedTask.category || undefined,
-            priority: editedTask.priority || "medium",
-            lastSave: new Date(),
-          };
-        }
-        return task;
-      });
-      setUser((prevUser) => ({
-        ...prevUser,
-        tasks: updatedTasks,
-      }));
+      const updatedTasks = user.tasks.map((t) =>
+        t.id === editedTask.id
+          ? {
+              ...t,
+              ...editedTask,
+              deadline: editedTask.deadline ? new Date(editedTask.deadline) : undefined,
+              lastSave: new Date(),
+            }
+          : t,
+      );
+
+      setUser((prev) => ({ ...prev, tasks: updatedTasks }));
       onClose();
       showToast(
         <div>
@@ -99,18 +107,12 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   };
 
   const handleCancel = () => {
-    onClose();
     setEditedTask(task);
-    setSelectedCategories(task?.category as Category[]);
+    setSelectedCategories(task?.category || []);
+    onClose();
   };
 
-  useEffect(() => {
-    setEditedTask((prevTask) => ({
-      ...(prevTask as Task),
-      category: (selectedCategories as Category[]) || undefined,
-    }));
-  }, [selectedCategories]);
-
+  // Warn on unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (JSON.stringify(editedTask) !== JSON.stringify(task) && open) {
@@ -126,10 +128,14 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleCancel}
       slotProps={{
         paper: {
-          style: { borderRadius: "24px", padding: "12px", maxWidth: "600px" },
+          style: {
+            borderRadius: "24px",
+            padding: "12px",
+            maxWidth: "600px",
+          },
         },
       }}
     >
@@ -137,30 +143,31 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
         title="Edit Task"
         subTitle={
           editedTask?.lastSave
-            ? `Last edited ${timeAgo(new Date(editedTask.lastSave))} • ${formatDate(
+            ? `Last edited ${timeAgo(
                 new Date(editedTask.lastSave),
-              )}`
+              )} • ${formatDate(new Date(editedTask.lastSave))}`
             : "Edit the details of the task."
         }
         icon={<EditCalendarRounded />}
-        onClose={onClose}
+        onClose={handleCancel}
       />
       <DialogContent>
         <CustomEmojiPicker
-          emoji={editedTask?.emoji || undefined}
+          emoji={emoji || undefined}
           setEmoji={setEmoji}
           color={editedTask?.color}
           name={editedTask?.name || ""}
           type="task"
         />
 
+        {/* Name */}
         <StyledInput
           label="Name"
           name="name"
           autoComplete="off"
           value={editedTask?.name || ""}
           onChange={handleInputChange}
-          error={nameError || editedTask?.name === ""}
+          error={!!(nameError || editedTask?.name === "")}
           helperText={
             editedTask?.name
               ? editedTask?.name.length === 0
@@ -172,6 +179,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           }
         />
 
+        {/* Description */}
         <StyledInput
           label="Description"
           name="description"
@@ -181,7 +189,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           multiline
           rows={4}
           margin="normal"
-          error={descriptionError}
+          error={!!descriptionError}
           helperText={
             editedTask?.description
               ? descriptionError
@@ -191,45 +199,39 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           }
         />
 
+        {/* Deadline */}
         <StyledInput
           label="Deadline date"
           name="deadline"
           type="datetime-local"
           value={
-            editedTask?.deadline
-              ? new Date(editedTask.deadline).toLocaleString("sv").replace(" ", "T").slice(0, 16)
-              : ""
+            editedTask?.deadline ? new Date(editedTask.deadline).toISOString().slice(0, 16) : ""
           }
           onChange={handleInputChange}
-          slotProps={{
-            inputLabel: { shrink: true },
-            input: {
-              startAdornment: editedTask?.deadline ? (
-                <InputAdornment position="start">
-                  <Tooltip title="Clear">
-                    <IconButton
-                      color="error"
-                      onClick={() =>
-                        setEditedTask((prevTask) => ({
-                          ...(prevTask as Task),
-                          deadline: undefined,
-                        }))
-                      }
-                    >
-                      <CancelRounded />
-                    </IconButton>
-                  </Tooltip>
-                </InputAdornment>
-              ) : undefined,
-            },
+          InputLabelProps={{ shrink: true }}
+          InputProps={{
+            startAdornment: editedTask?.deadline ? (
+              <InputAdornment position="start">
+                <Tooltip title="Clear">
+                  <IconButton
+                    color="error"
+                    onClick={() =>
+                      setEditedTask((prev) => (prev ? { ...prev, deadline: undefined } : prev))
+                    }
+                  >
+                    <CancelRounded />
+                  </IconButton>
+                </Tooltip>
+              </InputAdornment>
+            ) : undefined,
           }}
           sx={{
             colorScheme: theme.darkmode ? "dark" : "light",
-            " & .MuiInputBase-root": { transition: ".3s all" },
+            "& .MuiInputBase-root": { transition: ".3s all" },
           }}
         />
 
-        {/* ✅ Priority selection */}
+        {/* Priority */}
         <StyledInput
           select
           label="Priority"
@@ -244,6 +246,7 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           <MenuItem value="critical">Critical</MenuItem>
         </StyledInput>
 
+        {/* Categories */}
         {settings.enableCategories && (
           <CategorySelect
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
@@ -252,14 +255,19 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           />
         )}
 
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "8px" }}>
+        {/* Color */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "8px",
+          }}
+        >
           <ColorPicker
             width={"100%"}
             color={editedTask?.color || "#000000"}
             fontColor={theme.darkmode ? ColorPalette.fontLight : ColorPalette.fontDark}
-            onColorChange={(color) =>
-              setEditedTask((prevTask) => ({ ...(prevTask as Task), color }))
-            }
+            onColorChange={(color) => setEditedTask((prev) => (prev ? { ...prev, color } : prev))}
           />
         </div>
       </DialogContent>
@@ -269,9 +277,9 @@ export const EditTask = ({ open, task, onClose }: EditTaskProps) => {
           onClick={handleSave}
           color="primary"
           disabled={
-            nameError ||
+            !!nameError ||
             editedTask?.name === "" ||
-            descriptionError ||
+            !!descriptionError ||
             JSON.stringify(editedTask) === JSON.stringify(task)
           }
         >

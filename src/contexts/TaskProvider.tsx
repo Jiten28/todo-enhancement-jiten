@@ -1,5 +1,5 @@
 import { ReactNode, useState, useCallback, useMemo, useContext } from "react";
-import { Category, SortOption, UUID } from "../types/user";
+import type { Category, SortOption, UUID, Task } from "../types/user";
 import { useStorageState } from "../hooks/useStorageState";
 import { HighlightedText } from "../components/tasks/tasks.styled";
 import { TaskContext, TaskContextType } from "./TaskContext";
@@ -25,9 +25,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
-
   const [moveMode, setMoveMode] = useStorageState<boolean>(false, "moveMode", "sessionStorage");
 
+  // ✅ editing state
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // ✅ date filter state
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "thisWeek" | "custom">("all");
   const [customDateFrom, setCustomDateFrom] = useState<string | null>(null);
   const [customDateTo, setCustomDateTo] = useState<string | null>(null);
@@ -64,10 +67,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       setAnchorEl(null);
       setMultipleSelectedTasks((prevSelectedTaskIds) => {
         if (prevSelectedTaskIds.includes(taskId)) {
-          // Deselect the task if already selected
           return prevSelectedTaskIds.filter((id) => id !== taskId);
         } else {
-          // Select the task if not selected
           return [...prevSelectedTaskIds, taskId];
         }
       });
@@ -75,13 +76,11 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     [setMultipleSelectedTasks],
   );
 
-  // Memoize this function since it's used in render
   const highlightMatchingText = useCallback(
     (text: string) => {
       if (!search) {
         return text;
       }
-
       const parts = text.split(new RegExp(`(${search})`, "gi"));
       return parts.map((part, index) =>
         part.toLowerCase() === search.toLowerCase() ? (
@@ -95,7 +94,6 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleDeleteTask = useCallback(() => {
-    // Opens the delete task dialog
     if (selectedTaskId) {
       setDeleteDialogOpen(true);
     }
@@ -104,9 +102,6 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
   const handleCloseMoreMenu = useCallback(() => {
     setAnchorEl(null);
     document.body.style.overflow = "visible";
-    // if (selectedTaskId && !isMobile && expandedTasks.includes(selectedTaskId)) {
-    //   toggleShowMore(selectedTaskId);
-    // }
   }, []);
 
   const updateCategory = useCallback(
@@ -115,15 +110,12 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         const updatedCategories = prev.categories.map((c) =>
           c.id === patch.id ? { ...c, ...patch } : c,
         );
-
         const updatedTasks = prev.tasks.map((task) => {
           const updatedCategoryList = task.category?.map((c) =>
             c.id === patch.id ? { ...c, ...patch } : c,
           );
-
           return { ...task, category: updatedCategoryList };
         });
-
         return {
           ...prev,
           categories: updatedCategories,
@@ -134,7 +126,6 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     [setUser],
   );
 
-  // Memoize the context value to prevent recreation on every render
   const contextValue = useMemo<TaskContextType>(
     () => ({
       selectedTaskId,
@@ -154,6 +145,8 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       handleSelectTask,
       editModalOpen,
       setEditModalOpen,
+      editingTask,
+      setEditingTask,
       handleDeleteTask,
       deleteDialogOpen,
       setDeleteDialogOpen,
@@ -177,15 +170,13 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       anchorEl,
       anchorPosition,
       expandedTasks,
-      setExpandedTasks,
       toggleShowMore,
       search,
-      setSearch,
       highlightMatchingText,
       multipleSelectedTasks,
-      setMultipleSelectedTasks,
       handleSelectTask,
       editModalOpen,
+      editingTask,
       handleDeleteTask,
       deleteDialogOpen,
       handleCloseMoreMenu,
@@ -193,7 +184,6 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
       setSortOption,
       sortAnchorEl,
       moveMode,
-      setMoveMode,
       updateCategory,
       dateFilter,
       customDateFrom,
