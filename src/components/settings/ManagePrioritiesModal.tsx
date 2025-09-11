@@ -55,6 +55,8 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
 
   const handleColorChange = (id: string, color: string) => {
     setLocalPriorities((prev) => prev.map((p) => (p.id === id ? { ...p, color } : p)));
+    // also update editingColor so SketchPicker marker follows
+    setEditingColor((prev) => (prev && prev.id === id ? { ...prev, color } : prev));
   };
 
   const handleReorder = (oldIndex: number, newIndex: number) => {
@@ -94,18 +96,31 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
           >
             <List>
               {localPriorities.map((priority) => (
-                <ListItem key={priority.id} sx={{ bgcolor: "#f5f5f5a2", mb: 1, borderRadius: 2 }}>
-                  <DragIndicator sx={{ mr: 1, cursor: "grab" }} />
+                <ListItem
+                  key={priority.id}
+                  sx={{
+                    mb: 1,
+                    borderRadius: 2,
+                    bgcolor: "rgba(255,255,255,0.08)", // semi-glass background
+                    backdropFilter: "blur(6px)",
+                    border: `1px solid ${priority.color}55`, // subtle border tinted with priority color
+                    color: "#fff", // white text for contrast
+                  }}
+                >
+                  <DragIndicator sx={{ mr: 1, cursor: "grab", color: "#bbb" }} />
                   <ListItemText
                     primary={
                       <TextField
                         value={priority.label}
                         onChange={(e) => handleLabelChange(priority.id, e.target.value)}
                         variant="standard"
+                        InputProps={{
+                          disableUnderline: true,
+                          style: { color: "white", fontWeight: 500 },
+                        }}
                       />
                     }
                   />
-                  {/* Fixed size circle button */}
                   <Box
                     sx={{
                       width: 36,
@@ -122,14 +137,14 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
                           height: 24,
                           borderRadius: "50%",
                           bgcolor: priority.color,
-                          border: "1px solid #ccc",
+                          border: "2px solid white",
                         }}
                       />
                     </IconButton>
                   </Box>
                   <ListItemSecondaryAction>
                     <IconButton edge="end" disabled>
-                      <Delete />
+                      <Delete sx={{ color: "#888" }} />
                     </IconButton>
                   </ListItemSecondaryAction>
                 </ListItem>
@@ -145,7 +160,7 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
         </Button>
       </DialogActions>
 
-      {/* One global Popover, outside of ListItems (fixes shifting) */}
+      {/* One global Popover for color editing */}
       <Popover
         open={!!editingColor}
         anchorEl={anchorEl}
@@ -156,7 +171,7 @@ export const ManagePrioritiesModal: React.FC<Props> = ({ open, onClose }) => {
         {editingColor && (
           <SketchPicker
             color={editingColor.color}
-            onChangeComplete={(c: ColorResult) => handleColorChange(editingColor.id, c.hex)}
+            onChange={(c: ColorResult) => handleColorChange(editingColor.id, c.hex)}
           />
         )}
       </Popover>

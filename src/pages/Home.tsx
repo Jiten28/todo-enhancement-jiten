@@ -22,7 +22,7 @@ import { useResponsiveDisplay } from "../hooks/useResponsiveDisplay";
 import { useNavigate } from "react-router-dom";
 import { AnimatedGreeting } from "../components/AnimatedGreeting";
 import { showToast } from "../utils";
-import { DateFilter } from "../components/tasks/DateFilter"; // ✅ import filter
+import { DateFilter } from "../components/tasks/DateFilter";
 
 const TasksList = lazy(() =>
   import("../components/tasks/TasksList").then((module) => ({ default: module.TasksList })),
@@ -107,18 +107,18 @@ const Home = () => {
 
   return (
     <>
-      {/* ✅ Header with greeting left, filter+avatar right */}
+      {/* ✅ Header with greeting on left, filter+avatar on right */}
       <GreetingHeader
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: "16px",
+          gap: "20px",
         }}
       >
-        {/* Greeting text */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+        {/* Left → Greeting */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: 0 }}>
           <Emoji unified="1f44b" emojiStyle={emojisStyle} /> &nbsp; {timeGreeting}
           {name && (
             <span translate="no">
@@ -127,17 +127,17 @@ const Home = () => {
           )}
         </div>
 
-        {/* Right side → Filter + Avatar */}
+        {/* Right → Filter + Avatar (from layout) */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "20px",
+            flexShrink: 0,
+            marginRight: "65px", // ✅ ensure gap from avatar
           }}
         >
-          <DateFilter /> {/* ✅ Filter button */}
-          {/* Avatar is already rendered in MainLayout/Header, 
-              so nothing else to add here */}
+          <DateFilter />
         </div>
       </GreetingHeader>
 
@@ -148,6 +148,7 @@ const Home = () => {
           <WifiOff /> You're offline but you can use the app!
         </Offline>
       )}
+
       {tasks.length > 0 && settings.showProgressBar && (
         <TasksCountContainer>
           <TasksCount glow={settings.enableGlow}>
