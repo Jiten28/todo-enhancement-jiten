@@ -6,6 +6,7 @@ import {
   DialogContent,
   IconButton,
   InputAdornment,
+  Chip,
 } from "@mui/material";
 import { useCallback, useContext, useEffect, useMemo, useState, memo, useRef } from "react";
 import { CustomDialogTitle, TaskItem } from "..";
@@ -18,7 +19,6 @@ import { getFontColor } from "../../utils";
 import { NoTasks, SearchClear, SearchInput, TasksContainer } from "./tasks.styled";
 import { TaskMenu } from "./TaskMenu";
 import { TaskSort } from "./TaskSort";
-import { DateFilter } from "./DateFilter";
 import {
   DndContext,
   DragEndEvent,
@@ -149,6 +149,7 @@ export const TasksList: React.FC = () => {
       } else if (dateFilter === "custom" && customDateFrom && customDateTo) {
         const start = new Date(customDateFrom);
         const end = new Date(customDateTo);
+        end.setHours(23, 59, 59, 999);
         const dateFilterFn = (t: Task) =>
           t.deadline ? new Date(t.deadline) >= start && new Date(t.deadline) <= end : false;
         pinnedTasks = pinnedTasks.filter(dateFilterFn);
@@ -286,9 +287,6 @@ export const TasksList: React.FC = () => {
                 }}
               />
 
-              {/* 📅 Date Filter */}
-              <DateFilter />
-
               <TaskSort />
             </DisabledThemeProvider>
           </Box>
@@ -314,17 +312,34 @@ export const TasksList: React.FC = () => {
               items={orderedTasks.map((task) => task.id)}
               strategy={verticalListSortingStrategy}
             >
-              {orderedTasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  features={{ enableLinks: true, enableGlow: user.settings.enableGlow }}
-                  onContextMenu={(e) =>
-                    handleClick(e as unknown as React.MouseEvent<HTMLElement>, task.id)
-                  }
-                  actions={<TaskMenuButton task={task} onClick={(e) => handleClick(e, task.id)} />}
-                />
-              ))}
+              {orderedTasks.map((task) => {
+                const isOverdue =
+                  task.deadline &&
+                  !task.done &&
+                  new Date(task.deadline).getTime() < new Date().getTime();
+
+                const noDeadline = !task.deadline;
+
+                return (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    features={{ enableLinks: true, enableGlow: user.settings.enableGlow }}
+                    onContextMenu={(e) =>
+                      handleClick(e as unknown as React.MouseEvent<HTMLElement>, task.id)
+                    }
+                    actions={
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        {isOverdue && <Chip label="Overdue 🔴" size="small" color="error" />}
+                        {noDeadline && dateFilter === "all" && (
+                          <Chip label="No Deadline" size="small" color="default" />
+                        )}
+                        <TaskMenuButton task={task} onClick={(e) => handleClick(e, task.id)} />
+                      </Box>
+                    }
+                  />
+                );
+              })}
             </SortableContext>
             <DragOverlay>
               {activeDragId ? (
@@ -344,17 +359,34 @@ export const TasksList: React.FC = () => {
             </DragOverlay>
           </DndContext>
         ) : (
-          orderedTasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              textHighlighter={highlightMatchingText}
-              onContextMenu={(e: React.MouseEvent<Element>) =>
-                handleClick(e as unknown as React.MouseEvent<HTMLElement>, task.id)
-              }
-              actions={<TaskMenuButton task={task} onClick={(e) => handleClick(e, task.id)} />}
-            />
-          ))
+          orderedTasks.map((task) => {
+            const isOverdue =
+              task.deadline &&
+              !task.done &&
+              new Date(task.deadline).getTime() < new Date().getTime();
+
+            const noDeadline = !task.deadline;
+
+            return (
+              <TaskItem
+                key={task.id}
+                task={task}
+                textHighlighter={highlightMatchingText}
+                onContextMenu={(e: React.MouseEvent<Element>) =>
+                  handleClick(e as unknown as React.MouseEvent<HTMLElement>, task.id)
+                }
+                actions={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    {isOverdue && <Chip label="Overdue 🔴" size="small" color="error" />}
+                    {noDeadline && dateFilter === "all" && (
+                      <Chip label="No Deadline" size="small" color="default" />
+                    )}
+                    <TaskMenuButton task={task} onClick={(e) => handleClick(e, task.id)} />
+                  </Box>
+                }
+              />
+            );
+          })
         )}
       </TasksContainer>
 

@@ -22,6 +22,7 @@ import { useResponsiveDisplay } from "../hooks/useResponsiveDisplay";
 import { useNavigate } from "react-router-dom";
 import { AnimatedGreeting } from "../components/AnimatedGreeting";
 import { showToast } from "../utils";
+import { DateFilter } from "../components/tasks/DateFilter"; // ✅ import filter
 
 const TasksList = lazy(() =>
   import("../components/tasks/TasksList").then((module) => ({ default: module.TasksList })),
@@ -39,7 +40,7 @@ const Home = () => {
     document.title = "Todo App";
   }, []);
 
-  // Calculate these values only when tasks change
+  // ✅ Task stats
   const taskStats = useMemo(() => {
     const completedCount = tasks.filter((task) => task.done).length;
     const completedPercentage = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0;
@@ -63,7 +64,7 @@ const Home = () => {
     };
   }, [tasks]);
 
-  // Memoize time-based greeting
+  // ✅ Greeting
   const timeGreeting = useMemo(() => {
     const currentHour = new Date().getHours();
     if (currentHour < 12 && currentHour >= 5) {
@@ -75,7 +76,7 @@ const Home = () => {
     }
   }, []);
 
-  // Memoize task completion text
+  // ✅ Task completion text
   const taskCompletionText = useMemo(() => {
     const percentage = taskStats.completedTaskPercentage;
     switch (true) {
@@ -106,13 +107,38 @@ const Home = () => {
 
   return (
     <>
-      <GreetingHeader>
-        <Emoji unified="1f44b" emojiStyle={emojisStyle} /> &nbsp; {timeGreeting}
-        {name && (
-          <span translate="no">
-            , <span>{name}</span>
-          </span>
-        )}
+      {/* ✅ Header with greeting left, filter+avatar right */}
+      <GreetingHeader
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "16px",
+        }}
+      >
+        {/* Greeting text */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1 }}>
+          <Emoji unified="1f44b" emojiStyle={emojisStyle} /> &nbsp; {timeGreeting}
+          {name && (
+            <span translate="no">
+              , <span>{name}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Right side → Filter + Avatar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "20px",
+          }}
+        >
+          <DateFilter /> {/* ✅ Filter button */}
+          {/* Avatar is already rendered in MainLayout/Header, 
+              so nothing else to add here */}
+        </div>
       </GreetingHeader>
 
       <AnimatedGreeting />
@@ -155,7 +181,6 @@ const Home = () => {
                 aria-label="Progress"
                 glow={settings.enableGlow}
               />
-
               <ProgressPercentageContainer
                 glow={settings.enableGlow && taskStats.completedTaskPercentage > 0}
               >
@@ -175,12 +200,7 @@ const Home = () => {
               </TaskCountHeader>
               <TaskCompletionText>{taskCompletionText}</TaskCompletionText>
               {taskStats.tasksWithDeadlineTodayCount > 0 && (
-                <span
-                  style={{
-                    opacity: 0.8,
-                    display: "inline-block",
-                  }}
-                >
+                <span style={{ opacity: 0.8, display: "inline-block" }}>
                   <TodayRounded sx={{ fontSize: "20px", verticalAlign: "middle" }} />
                   &nbsp;Tasks due today:&nbsp;
                   <span translate="no">
@@ -194,6 +214,7 @@ const Home = () => {
           </TasksCount>
         </TasksCountContainer>
       )}
+
       <Suspense
         fallback={
           <Box display="flex" justifyContent="center" alignItems="center">
@@ -203,6 +224,7 @@ const Home = () => {
       >
         <TasksList />
       </Suspense>
+
       {!isMobile && (
         <Tooltip title={tasks.length > 0 ? "Add New Task" : "Add Task"} placement="left">
           <AddButton

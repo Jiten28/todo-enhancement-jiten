@@ -86,18 +86,18 @@ export const DateFilter = () => {
       </Menu>
 
       {dateFilter === "custom" && (
-        <div style={{ display: "flex", gap: "8px", marginTop: "6px" }}>
-          <input
+        <CustomDateContainer>
+          <StyledDateInput
             type="date"
             value={customDateFrom || ""}
             onChange={(e) => setCustomDateFrom(e.target.value || null)}
           />
-          <input
+          <StyledDateInput
             type="date"
             value={customDateTo || ""}
             onChange={(e) => setCustomDateTo(e.target.value || null)}
           />
-        </div>
+        </CustomDateContainer>
       )}
     </>
   );
@@ -139,4 +139,26 @@ const FilterLabel = styled(Typography)`
 const FilterValue = styled(Typography)`
   font-size: 0.8rem;
   font-weight: 500;
+`;
+
+const CustomDateContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+`;
+
+const StyledDateInput = styled.input`
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid ${({ theme }) => (isDark(theme.secondary) ? "#44479cb7" : theme.primary)};
+  background: ${({ theme }) => (isDark(theme.secondary) ? "#090b2258" : "#ffffff3e")};
+  color: ${({ theme }) => getFontColor(theme.secondary)};
+  font-size: 0.85rem;
+  outline: none;
+  flex: 1;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.primary};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.primary}40;
+  }
 `;
