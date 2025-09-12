@@ -42,7 +42,8 @@ export const TaskMenu = () => {
     anchorEl,
     anchorPosition,
     multipleSelectedTasks,
-    handleSelectTask,
+    setMultipleSelectedTasks,
+    setSelectedTaskId,
     setEditModalOpen,
     setEditingTask,
     handleDeleteTask,
@@ -51,6 +52,7 @@ export const TaskMenu = () => {
     setMoveMode,
     setSearch,
   } = useContext(TaskContext);
+
   const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
 
   const isMobile = useResponsiveDisplay();
@@ -63,12 +65,11 @@ export const TaskMenu = () => {
   }, [selectedTaskId, tasks]);
 
   const redirectToTaskDetails = () => {
-    const taskId = selectedTask?.id.toString().replace(".", "");
+    const taskId = selectedTask?.id?.toString()?.replace(".", "");
     n(`/task/${taskId}`);
   };
 
   const handleMarkAsDone = () => {
-    // Toggles the "done" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
       const updatedTasks = tasks.map((task) => {
@@ -104,7 +105,6 @@ export const TaskMenu = () => {
   };
 
   const handlePin = () => {
-    // Toggles the "pinned" property of the selected task
     if (selectedTaskId) {
       handleCloseMoreMenu();
       const updatedTasks = tasks.map((task) => {
@@ -124,16 +124,13 @@ export const TaskMenu = () => {
     handleCloseMoreMenu();
     if (selectedTaskId) {
       if (selectedTask) {
-        // Create a duplicated task with a new ID and current date
         const duplicatedTask: Task = {
           ...selectedTask,
           id: generateUUID(),
           date: new Date(),
           lastSave: undefined,
         };
-        // Add the duplicated task to the existing tasks
         const updatedTasks = [...tasks, duplicatedTask];
-        // Update the user object with the updated tasks
         setUser((prevUser) => ({
           ...prevUser,
           tasks: updatedTasks,
@@ -142,7 +139,7 @@ export const TaskMenu = () => {
     }
   };
 
-  //https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis
+  // Read aloud (unchanged)
   const handleReadAloud = () => {
     const voices = window.speechSynthesis.getVoices() ?? [];
     const voice = voices.find((voice) => voice.name === settings.voice.split("::")[0]);
@@ -150,8 +147,7 @@ export const TaskMenu = () => {
     const taskName = selectedTask.name ? selectedTask.name + ". " : "";
     const taskDescription = selectedTask?.description
       ? selectedTask?.description?.replace(/((?:https?):\/\/[^\s/$.?#].[^\s]*)/gi, "") + ". "
-      : ""; // remove links from description
-    // Read task date in voice language
+      : "";
     const taskDate = new Intl.DateTimeFormat(voice ? voice.lang : navigator.language, {
       dateStyle: "full",
       timeStyle: "short",
@@ -246,11 +242,8 @@ export const TaskMenu = () => {
       },
     );
 
-    // Set up event listener for the end of speech
     utterThis.onend = () => {
-      // Close the menu
       handleCloseMoreMenu();
-      // Hide the toast when speech ends
       toast.dismiss(SpeechToastId);
     };
 
@@ -259,6 +252,7 @@ export const TaskMenu = () => {
     }
   };
 
+  // Build menu items
   const menuItems: JSX.Element[] = [
     <StyledMenuItem key="done" onClick={handleMarkAsDone}>
       {selectedTask.done ? <Close /> : <Done />}
@@ -270,11 +264,19 @@ export const TaskMenu = () => {
       &nbsp; {selectedTask.pinned ? "Unpin" : "Pin"}
     </StyledMenuItem>,
 
+    // Select -> sets multipleSelectedTasks to start selection
     ...(multipleSelectedTasks.length === 0
       ? [
           <StyledMenuItem
             key="select"
-            onClick={() => handleSelectTask(selectedTaskId || generateUUID())}
+            onClick={() => {
+              // enable select: place the currently selected task into multipleSelectedTasks
+              if (selectedTaskId) {
+                setSelectedTaskId(selectedTaskId);
+                setMultipleSelectedTasks([selectedTaskId]);
+              }
+              handleCloseMoreMenu();
+            }}
             disabled={moveMode}
           >
             <RadioButtonChecked /> &nbsp; Select
@@ -392,7 +394,6 @@ export const TaskMenu = () => {
 
   return (
     <>
-      {/* close sheet instantly if motion is reduced */}
       {isMobile && (prefersReducedMotion ? Boolean(anchorEl) && sheet : sheet)}
 
       {!isMobile && (

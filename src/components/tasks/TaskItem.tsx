@@ -44,7 +44,7 @@ interface TaskItemProps {
     onSelect?: (taskId: UUID) => void;
     onDeselect?: (taskId: UUID) => void;
   };
-  onContextMenu?: (e: React.MouseEvent<Element>) => void;
+  onContextMenu?: (e: React.MouseEvent<HTMLElement>) => void;
   actions?: React.ReactNode;
   blur?: boolean;
   textHighlighter?: (text: string) => React.ReactNode;
@@ -91,8 +91,8 @@ export const TaskItem = memo(
 
     if (!task) return null;
 
-    // ✅ Get live priority details from UserContext
-    const priority = user.priorityList.find((p) => p.id === task.priority)!;
+    // Get priority details from user
+    const priority = user.priorityList.find((p) => p.id === task.priority);
 
     return (
       <TaskContainer
@@ -122,7 +122,7 @@ export const TaskItem = memo(
           </DragHandle>
         )}
 
-        {enableSelection && selectedIds.length > 0 && (
+        {enableSelection && selectedIds.length >= 0 && (
           <StyledRadio
             clr={getFontColor(task.color)}
             checked={isSelected}
@@ -166,12 +166,11 @@ export const TaskItem = memo(
           <TaskHeader>
             <TaskName done={task.done}>{textHighlighter(task.name)}</TaskName>
 
-            {/* ✅ Priority badge uses dynamic user-defined color & label */}
             {priority && <PriorityBadge color={priority.color}>{priority.label}</PriorityBadge>}
 
             <Tooltip
               title={
-                moveMode && enableMoveMode
+                moveMode
                   ? ""
                   : new Intl.DateTimeFormat(navigator.language, {
                       dateStyle: "full",
@@ -195,7 +194,7 @@ export const TaskItem = memo(
           {task.deadline && (
             <Tooltip
               title={
-                moveMode && enableMoveMode
+                moveMode
                   ? ""
                   : new Intl.DateTimeFormat(navigator.language, {
                       dateStyle: "full",
