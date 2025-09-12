@@ -24,14 +24,48 @@ export default function AboutTab() {
         sharing tasks via link, P2P synchronization using WebRTC, theme customization and offline
         usage as a Progressive Web App (PWA).
       </Typography>
+
+      <Typography variant="body2" sx={{ mb: 2 }}>
+        👋 Hi, I’m <strong>Jiten Kumar</strong> — a passionate developer focused on building modern,
+        user-friendly web applications.
+      </Typography>
+
       <img src={baner} style={{ width: "100%", height: "auto" }} alt="Todo App Screenshot" />
+
       <Typography variant="caption" sx={{ display: "block", mt: 2 }}>
-        Created by <Link href="https://github.com/maciekt07">maciekt07</Link> <br />
+        Developed by <Link href="https://github.com/Jiten28">Jiten Kumar</Link> <br />
         Explore the project on GitHub:{" "}
-        <Link href="https://github.com/maciekt07/TodoApp" target="_blank" rel="noopener noreferrer">
-          Todo App Repository
+        <Link
+          href="https://github.com/Jiten28/todo-enhancement-jiten"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Todo Enhancement Repository
+        </Link>
+        <br />
+        Connect with me:
+        <br />
+        <Link
+          href="https://www.linkedin.com/in/jiten-kumar-85a03217a"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          LinkedIn
+        </Link>{" "}
+        |{" "}
+        <Link
+          href="https://jitenkumarportfolio.netlify.app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Portfolio
+        </Link>{" "}
+        |{" "}
+        <Link href="https://buymeacoffee.com/jiten282005" target="_blank" rel="noopener noreferrer">
+          Buy Me a Coffee
         </Link>
       </Typography>
+
       {storageUsage !== undefined && storageUsage !== 0 && (
         <>
           <Divider sx={{ my: 1 }} />
