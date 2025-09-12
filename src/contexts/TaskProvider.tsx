@@ -1,108 +1,135 @@
-import { Dispatch, ReactNode, SetStateAction, useState, useMemo, useCallback } from "react";
+import { ReactNode, useState, useMemo, useCallback, useContext } from "react";
 import type { Category, SortOption, UUID, Task } from "../types/user";
-import { TaskContext } from "./TaskContext";
+import { useStorageState } from "../hooks/useStorageState";
+import { HighlightedText } from "../components/tasks/tasks.styled";
+import { TaskContext, TaskContextType } from "./TaskContext";
+import { UserContext } from "./UserContext";
 
-// ----- Types -----
-type DateFilterOption = "all" | "today" | "thisWeek" | "custom";
-
-interface TaskState {
-  selectedTaskId: UUID | null;
-  anchorEl: null | HTMLElement;
-  anchorPosition: { top: number; left: number } | null;
-  expandedTasks: UUID[];
-  multipleSelectedTasks: UUID[];
-  search: string;
-  editModalOpen: boolean;
-  deleteDialogOpen: boolean;
-  sortOption: SortOption;
-  sortAnchorEl: null | HTMLElement;
-  moveMode: boolean;
-  selectMode: boolean;
-
-  // date filter
-  dateFilter: DateFilterOption;
-  customDateFrom?: string | null;
-  customDateTo?: string | null;
-
-  // edit state
-  editingTask: Task | null;
-}
-
-interface TaskActions {
-  setSelectedTaskId: Dispatch<SetStateAction<UUID | null>>;
-  setAnchorEl: Dispatch<SetStateAction<null | HTMLElement>>;
-  setAnchorPosition: Dispatch<SetStateAction<{ top: number; left: number } | null>>;
-  setExpandedTasks: Dispatch<SetStateAction<UUID[]>>;
-  setMultipleSelectedTasks: Dispatch<SetStateAction<UUID[]>>;
-  setSearch: Dispatch<SetStateAction<string>>;
-  toggleShowMore: (taskId: UUID) => void;
-
-  // selection actions
-  handleSelectTask: (taskId: UUID) => void;
-  clearSelectedTasks: () => void;
-  setSelectMode: Dispatch<SetStateAction<boolean>>;
-
-  highlightMatchingText: (text: string) => ReactNode;
-  setEditModalOpen: Dispatch<SetStateAction<boolean>>;
-  setDeleteDialogOpen: Dispatch<SetStateAction<boolean>>;
-  handleDeleteTask: () => void;
-  handleCloseMoreMenu: () => void;
-  setSortOption: (option: SortOption) => void;
-  setSortAnchorEl: Dispatch<SetStateAction<null | HTMLElement>>;
-  setMoveMode: Dispatch<SetStateAction<boolean>>;
-  updateCategory: (category: Partial<Category>) => void;
-  setDateFilter: (filter: DateFilterOption) => void;
-  setCustomDateFrom: (value: string | null) => void;
-  setCustomDateTo: (value: string | null) => void;
-
-  // edit actions
-  setEditingTask: Dispatch<SetStateAction<Task | null>>;
-}
-
-export type TaskContextType = TaskState & TaskActions;
-
-// ----- Provider -----
 export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { user, setUser } = useContext(UserContext);
+
   const [selectedTaskId, setSelectedTaskId] = useState<UUID | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [anchorPosition, setAnchorPosition] = useState<{
     top: number;
     left: number;
   } | null>(null);
-  const [expandedTasks, setExpandedTasks] = useState<UUID[]>([]);
-  const [multipleSelectedTasks, setMultipleSelectedTasks] = useState<UUID[]>([]);
-  const [search, setSearch] = useState<string>("");
+
+  const [expandedTasks, setExpandedTasks] = useStorageState<UUID[]>(
+    [],
+    "expandedTasks",
+    "sessionStorage",
+  );
+  const [multipleSelectedTasks, setMultipleSelectedTasks] = useStorageState<UUID[]>(
+    [],
+    "selectedTasks",
+    "sessionStorage",
+  );
+  const [search, setSearch] = useStorageState<string>("", "search", "sessionStorage");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>("dateCreated");
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
-  const [moveMode, setMoveMode] = useState(false);
-  const [selectMode, setSelectMode] = useState(false);
-  const [dateFilter, setDateFilter] = useState<DateFilterOption>("all");
-  const [customDateFrom, setCustomDateFrom] = useState<string | null>(null);
-  const [customDateTo, setCustomDateTo] = useState<string | null>(null);
+  const [moveMode, setMoveMode] = useStorageState<boolean>(false, "moveMode", "sessionStorage");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  // Toggle selection
-  const handleSelectTask = useCallback((taskId: UUID) => {
-    setSelectMode(true);
-    setMultipleSelectedTasks((prev) =>
-      prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId],
-    );
-  }, []);
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "thisWeek" | "custom">("all");
+  const [customDateFrom, setCustomDateFrom] = useState<string | null>(null);
+  const [customDateTo, setCustomDateTo] = useState<string | null>(null);
 
-  // Clear selection
+  const [selectMode, setSelectMode] = useState(false);
+
+  const sortOption = user.settings.sortOption;
+  const setSortOption = useCallback(
+    (option: SortOption) => {
+      setUser((prev) => ({
+        ...prev,
+        settings: {
+          ...prev.settings,
+          sortOption: option,
+        },
+      }));
+    },
+    [setUser],
+  );
+
+  const toggleShowMore = useCallback(
+    (taskId: UUID) => {
+      setExpandedTasks((prevExpandedTasks) =>
+        prevExpandedTasks.includes(taskId)
+          ? prevExpandedTasks.filter((id) => id !== taskId)
+          : [...prevExpandedTasks, taskId],
+      );
+    },
+    [setExpandedTasks],
+  );
+
+  const handleSelectTask = useCallback(
+    (taskId: UUID) => {
+      setAnchorEl(null);
+      setMultipleSelectedTasks((prev) =>
+        prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId],
+      );
+      setSelectMode(true);
+    },
+    [setMultipleSelectedTasks],
+  );
+
   const clearSelectedTasks = useCallback(() => {
     setMultipleSelectedTasks([]);
     setSelectMode(false);
+  }, [setMultipleSelectedTasks]);
+
+  const highlightMatchingText = useCallback(
+    (text?: string) => {
+      if (!text) return null;
+      if (!search) return text;
+
+      const safeSearch = search.toLowerCase();
+      const parts = text.split(new RegExp(`(${search})`, "gi"));
+
+      return parts.map((part, index) =>
+        part.toLowerCase() === safeSearch ? (
+          <HighlightedText key={index}>{part}</HighlightedText>
+        ) : (
+          part
+        ),
+      );
+    },
+    [search],
+  );
+
+  const handleDeleteTask = useCallback(() => {
+    if (selectedTaskId) {
+      setDeleteDialogOpen(true);
+    }
+  }, [selectedTaskId]);
+
+  const handleCloseMoreMenu = useCallback(() => {
+    setAnchorEl(null);
+    document.body.style.overflow = "visible";
   }, []);
 
-  // Placeholder handlers
-  const toggleShowMore = () => {};
-  const highlightMatchingText = (text: string) => text;
-  const handleDeleteTask = () => {};
-  const handleCloseMoreMenu = () => {};
-  const updateCategory = () => {};
+  const updateCategory = useCallback(
+    (patch: Partial<Category>) => {
+      setUser((prev) => {
+        const updatedCategories = prev.categories.map((c) =>
+          c.id === patch.id ? { ...c, ...patch } : c,
+        );
+        const updatedTasks = prev.tasks.map((task) => {
+          const updatedCategoryList = task.category?.map((c) =>
+            c.id === patch.id ? { ...c, ...patch } : c,
+          );
+          return { ...task, category: updatedCategoryList };
+        });
+        return {
+          ...prev,
+          categories: updatedCategories,
+          tasks: updatedTasks,
+        };
+      });
+    },
+    [setUser],
+  );
 
   const value: TaskContextType = useMemo(
     () => ({
@@ -114,20 +141,21 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setAnchorPosition,
       expandedTasks,
       setExpandedTasks,
-      multipleSelectedTasks,
-      setMultipleSelectedTasks,
+      toggleShowMore,
       search,
       setSearch,
-      toggleShowMore,
+      highlightMatchingText,
+      multipleSelectedTasks,
+      setMultipleSelectedTasks,
       handleSelectTask,
       clearSelectedTasks,
-      setSelectMode,
-      highlightMatchingText,
       editModalOpen,
       setEditModalOpen,
+      editingTask,
+      setEditingTask,
+      handleDeleteTask,
       deleteDialogOpen,
       setDeleteDialogOpen,
-      handleDeleteTask,
       handleCloseMoreMenu,
       sortOption,
       setSortOption,
@@ -135,34 +163,33 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setSortAnchorEl,
       moveMode,
       setMoveMode,
-      selectMode,
+      updateCategory,
       dateFilter,
       setDateFilter,
       customDateFrom,
       setCustomDateFrom,
       customDateTo,
       setCustomDateTo,
-      editingTask,
-      setEditingTask,
-      updateCategory,
+      selectMode,
+      setSelectMode,
     }),
     [
       selectedTaskId,
       anchorEl,
       anchorPosition,
       expandedTasks,
-      multipleSelectedTasks,
       search,
+      multipleSelectedTasks,
       editModalOpen,
+      editingTask,
       deleteDialogOpen,
       sortOption,
       sortAnchorEl,
       moveMode,
-      selectMode,
       dateFilter,
       customDateFrom,
       customDateTo,
-      editingTask,
+      selectMode,
     ],
   );
 
