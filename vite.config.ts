@@ -16,10 +16,11 @@ const DEV_ENABLE_HTTPS = isDevHost;
 // NOTE: PWA + HTTPS only works on localhost, not network IPs. Set DEV_ENABLE_HTTPS to `false` for mobile testing.
 const DEV_ENABLE_PWA = false;
 
-// https://vitejs.dev/config/
 export default defineConfig({
   test: {
     globals: true,
+    environment: "jsdom",
+    setupFiles: "./setupTests.ts",
   },
   plugins: [
     react({
@@ -29,17 +30,15 @@ export default defineConfig({
       },
     }),
     DEV_ENABLE_HTTPS && basicSsl(),
-    // Generate QR code for npm run dev:host
     qrcode({ filter: (url) => /^https?:\/\/192\.168\.0\./.test(url) }),
-    // https://vite-pwa-org.netlify.app/
     VitePWA({
-      manifest, // manifest.ts
+      manifest,
       devOptions: {
         enabled: DEV_ENABLE_PWA,
         type: "module",
       },
       registerType: "prompt",
-      workbox, // workbox.config.ts
+      workbox,
       includeAssets: ["**/*", "sw.js", "!splash-screens/**/*"],
     }),
   ],
@@ -49,10 +48,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       onwarn(warning, warn) {
-        if (
-          warning.code === "SOURCEMAP_ERROR" ||
-          warning.message.includes("PURE") // ignore PURE comment warning
-        ) {
+        if (warning.code === "SOURCEMAP_ERROR" || warning.message.includes("PURE")) {
           return;
         }
         warn(warning);
@@ -79,7 +75,7 @@ export default defineConfig({
             if (id.includes("ntc-ts")) {
               return "ntc";
             }
-            return "vendor"; // other node_modules
+            return "vendor";
           }
 
           if (id.includes("src/components/tasks")) {

@@ -3,6 +3,13 @@ import type { Category, SortOption, UUID, Task } from "../types/user";
 
 export type DateFilterOption = "all" | "today" | "thisWeek" | "custom";
 
+// ✅ Priority type
+export type Priority = {
+  id: string;
+  label: string;
+  color: string;
+};
+
 interface TaskState {
   selectedTaskId: UUID | null;
   anchorEl: null | HTMLElement;
@@ -22,6 +29,9 @@ interface TaskState {
   customDateTo?: string | null;
 
   editingTask: Task | null;
+
+  // ✅ Add priorityList to state
+  priorityList: Priority[];
 }
 
 interface TaskActions {
