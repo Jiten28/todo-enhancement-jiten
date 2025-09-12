@@ -131,6 +131,13 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     [setUser],
   );
 
+  const priorityList = [
+    { id: "low", label: "Low", color: "#4caf50" },
+    { id: "medium", label: "Medium", color: "#ff9800" },
+    { id: "high", label: "High", color: "#f44336" },
+    { id: "critical", label: "Critical", color: "#e92222" },
+  ];
+
   const value: TaskContextType = useMemo(
     () => ({
       selectedTaskId,
@@ -172,6 +179,7 @@ export const TaskProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCustomDateTo,
       selectMode,
       setSelectMode,
+      priorityList,
     }),
     [
       selectedTaskId,
