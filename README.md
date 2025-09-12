@@ -40,6 +40,46 @@
 - 📴 **Progressive Web App (PWA)** – installable & offline-ready  
 - 🔄 **Update Prompt** for new versions  
 - 📱 **Custom Splash Screens** for mobile  
+- 📅 **Date-based Filters** (via **FilterBar**) → Quickly filter tasks by **All, Today, This Week, Custom Range**  
+- 🏷️ **Manage Priority (Settings)** → Customize priority **labels** and **colors** in app settings  
+- 📌 **Enhanced TaskCard** → Priority display is now visible directly on each task card  
+
+---
+
+## 📷 Screenshots
+
+Here are some key UI highlights:
+
+### 📅 FilterBar (Date-based Filters)
+
+<img src="screenshots/filterbar-all.png" width="400px" alt="FilterBar - All tasks" />  
+<img src="screenshots/filterbar-today.png" width="400px" alt="FilterBar - Today’s tasks" />  
+<img src="screenshots/filterbar-week.png" width="400px" alt="FilterBar - This Week’s tasks" />  
+<img src="screenshots/filterbar-custom.png" width="400px" alt="FilterBar - Custom date range" />  
+
+### 🏷️ Manage Priority
+
+<img src="screenshots/manage-priority.png" width="400px" alt="Manage Priority in settings" />  
+
+### 📌 TaskCard Priority
+
+<img src="screenshots/taskcard-priority.png" width="400px" alt="TaskCard with priority badge" />  
+
+General app views:
+
+<img src="screenshots/ss1.png" width="300px" />  
+
+<img src="screenshots/ss2.png" width="300px" />  
+
+<img src="screenshots/ss3.png" width="300px" /> 
+
+<img src="screenshots/ss4.png" width="300px" />  
+
+<img src="screenshots/ss5.png" width="300px" />  
+
+<img src="screenshots/ss6.png" width="300px" />  
+
+<img src="screenshots/sspc1.png" width="650px" />  
 
 ---
 
@@ -57,11 +97,11 @@ npm install
 
 # Start development server
 npm run dev
-```
+````
 
 Runs at [http://localhost:5173/](http://localhost:5173/).
 
-> 💡 For mobile testing:  
+> 💡 For mobile testing:
 > Use `npm run dev:host` to preview over local network (with HTTPS & QR code for quick access).
 
 ---
@@ -76,20 +116,33 @@ Generates optimized PWA build inside `/dist`.
 
 ---
 
-## 📷 Screenshots
-
-*(Update with your own screenshots later)*
-
-<img src="screenshots/ss1.png" width="300px" />  
-<img src="screenshots/ss2.png" width="300px" />  
-<img src="screenshots/ss3.png" width="300px" />  
-<img src="screenshots/sspc1.png" width="650px" />  
-
----
-
 ## 🚀 Performance
 
 <img src="screenshots/performance.png" width="600px" />
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! 🎉
+
+1. **Fork** the repository
+2. **Create** your feature branch:
+
+   ```bash
+   git checkout -b feature/awesome-feature
+   ```
+3. **Commit** your changes:
+
+   ```bash
+   git commit -m "Add awesome feature"
+   ```
+4. **Push** to the branch:
+
+   ```bash
+   git push origin feature/awesome-feature
+   ```
+5. **Open a Pull Request** 🚀
 
 ---
 
@@ -97,10 +150,10 @@ Generates optimized PWA build inside `/dist`.
 
 **Jiten Kumar**
 
-* 🌐 Portfolio: [jitenkumarportfolio.netlify.app](https://jitenkumarportfolio.netlify.app)  
-* 💻 GitHub: [Jiten28](https://github.com/Jiten28/todo-enhancement-jiten)  
-* 💼 LinkedIn: [Jiten Kumar](https://www.linkedin.com/in/jiten-kumar-85a03217a)  
-* ☕ Support: [Buy Me a Coffee](https://buymeacoffee.com/jiten282005)  
+* 🌐 Portfolio: [jitenkumarportfolio.netlify.app](https://jitenkumarportfolio.netlify.app)
+* 💻 GitHub: [Jiten28](https://github.com/Jiten28/todo-enhancement-jiten)
+* 💼 LinkedIn: [Jiten Kumar](https://www.linkedin.com/in/jiten-kumar-85a03217a)
+* ☕ Support: [Buy Me a Coffee](https://buymeacoffee.com/jiten282005)
 
 > Passionate about building modern web apps with React, TypeScript, and PWA features.
 
@@ -108,4 +161,5 @@ Generates optimized PWA build inside `/dist`.
 
 ## 📜 License
 
-licensed under [MIT](https://github.com/maciekt07/TodoApp/blob/main/LICENSE).
+Licensed under [MIT](https://github.com/Jiten28/todo-enhancement-jiten/blob/main/LICENSE).
+
