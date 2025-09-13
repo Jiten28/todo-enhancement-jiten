@@ -8,13 +8,14 @@
 
 <img src="src/assets/baner.webp" />
 
-## 🌐 Live Demo  
+## 🌐 Live Demo
+
 👉 [https://todo-enhancement.netlify.app](https://todo-enhancement.netlify.app)
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/e3b07d34-f0da-4280-9076-fd40eea893c6/deploy-status)](https://app.netlify.com/sites/todo-enhancement/deploys)  
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/Jiten28/todo-enhancement-jiten?color=%23b624ff)  
 ![GitHub created at](https://img.shields.io/github/created-at/Jiten28/todo-enhancement-jiten?color=%23b624ff)  
-![GitHub last commit](https://img.shields.io/github/last-commit/Jiten28/todo-enhancement-jiten?color=%23b624ff)  
+![GitHub last commit](https://img.shields.io/github/last-commit/Jiten28/todo-enhancement-jiten?color=%23b624ff)
 
 ---
 
@@ -33,16 +34,16 @@
 
 ## ⚡ Features
 
-- 🔗 **Share Tasks** by Link or QR Code  
-- 🎨 **Custom Themes & Dark Mode**  
-- 🗣️ **Task Reading Aloud** (SpeechSynthesis API)  
-- 📥 **Import / Export Tasks** via JSON  
-- 📴 **Progressive Web App (PWA)** – installable & offline-ready  
-- 🔄 **Update Prompt** for new versions  
-- 📱 **Custom Splash Screens** for mobile  
-- 📅 **Date-based Filters** (via **FilterBar**) → Quickly filter tasks by **All, Today, This Week, Custom Range**  
-- 🏷️ **Manage Priority (Settings)** → Customize priority **labels** and **colors** in app settings  
-- 📌 **Enhanced TaskCard** → Priority display is now visible directly on each task card  
+- 🔗 **Share Tasks** by Link or QR Code
+- 🎨 **Custom Themes & Dark Mode**
+- 🗣️ **Task Reading Aloud** (SpeechSynthesis API)
+- 📥 **Import / Export Tasks** via JSON
+- 📴 **Progressive Web App (PWA)** – installable & offline-ready
+- 🔄 **Update Prompt** for new versions
+- 📱 **Custom Splash Screens** for mobile
+- 📅 **Date-based Filters** (via **FilterBar**) → Quickly filter tasks by **All, Today, This Week, Custom Range**
+- 🏷️ **Manage Priority (Settings)** → Customize priority **labels** and **colors** in app settings
+- 📌 **Enhanced TaskCard** → Priority display is now visible directly on each task card
 
 ---
 
@@ -55,31 +56,31 @@ Here are some key UI highlights:
 <img src="screenshots/filterbar-all.png" width="400px" alt="FilterBar - All tasks" />  
 <img src="screenshots/filterbar-today.png" width="400px" alt="FilterBar - Today’s tasks" />  
 <img src="screenshots/filterbar-week.png" width="400px" alt="FilterBar - This Week’s tasks" />  
-<img src="screenshots/filterbar-custom.png" width="400px" alt="FilterBar - Custom date range" />  
+<img src="screenshots/filterbar-custom.png" width="400px" alt="FilterBar - Custom date range" />
 
 ### 🏷️ Manage Priority
 
-<img src="screenshots/manage-priority.png" width="400px" alt="Manage Priority in settings" />  
+<img src="screenshots/manage-priority.png" width="400px" alt="Manage Priority in settings" />
 
 ### 📌 TaskCard Priority
 
-<img src="screenshots/taskcard-priority.png" width="400px" alt="TaskCard with priority badge" />  
+<img src="screenshots/taskcard-priority.png" width="400px" alt="TaskCard with priority badge" />
 
 General app views:
 
-<img src="screenshots/ss1.png" width="300px" />  
+<img src="screenshots/ss1.png" width="300px" />
 
-<img src="screenshots/ss2.png" width="300px" />  
+<img src="screenshots/ss2.png" width="300px" />
 
-<img src="screenshots/ss3.png" width="300px" /> 
+<img src="screenshots/ss3.png" width="300px" />
 
-<img src="screenshots/ss4.png" width="300px" />  
+<img src="screenshots/ss4.png" width="300px" />
 
-<img src="screenshots/ss5.png" width="300px" />  
+<img src="screenshots/ss5.png" width="300px" />
 
-<img src="screenshots/ss6.png" width="300px" />  
+<img src="screenshots/ss6.png" width="300px" />
 
-<img src="screenshots/sspc1.png" width="650px" />  
+<img src="screenshots/sspc1.png" width="650px" />
 
 ---
 
@@ -97,7 +98,7 @@ npm install
 
 # Start development server
 npm run dev
-````
+```
 
 Runs at [http://localhost:5173/](http://localhost:5173/).
 
@@ -132,16 +133,19 @@ Contributions are welcome! 🎉
    ```bash
    git checkout -b feature/awesome-feature
    ```
+
 3. **Commit** your changes:
 
    ```bash
    git commit -m "Add awesome feature"
    ```
+
 4. **Push** to the branch:
 
    ```bash
    git push origin feature/awesome-feature
    ```
+
 5. **Open a Pull Request** 🚀
 
 ---
@@ -150,10 +154,10 @@ Contributions are welcome! 🎉
 
 **Jiten Kumar**
 
-* 🌐 Portfolio: [jitenkumarportfolio.netlify.app](https://jitenkumarportfolio.netlify.app)
-* 💻 GitHub: [Jiten28](https://github.com/Jiten28/todo-enhancement-jiten)
-* 💼 LinkedIn: [Jiten Kumar](https://www.linkedin.com/in/jiten-kumar-85a03217a)
-* ☕ Support: [Buy Me a Coffee](https://buymeacoffee.com/jiten282005)
+- 🌐 Portfolio: [jitenkumarportfolio.netlify.app](https://jitenkumarportfolio.netlify.app)
+- 💻 GitHub: [Jiten28](https://github.com/Jiten28/todo-enhancement-jiten)
+- 💼 LinkedIn: [Jiten Kumar](https://www.linkedin.com/in/jiten-kumar-85a03217a)
+- ☕ Support: [Buy Me a Coffee](https://buymeacoffee.com/jiten282005)
 
 > Passionate about building modern web apps with React, TypeScript, and PWA features.
 
@@ -162,4 +166,3 @@ Contributions are welcome! 🎉
 ## 📜 License
 
 Licensed under [MIT](https://github.com/Jiten28/todo-enhancement-jiten/blob/main/LICENSE).
-
